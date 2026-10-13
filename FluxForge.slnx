@@ -1,0 +1,13 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/FluxForge.Application/FluxForge.Application.csproj" />
+    <Project Path="src/FluxForge.Desktop/FluxForge.Desktop.csproj" />
+    <Project Path="src/FluxForge.Infrastructure/FluxForge.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/FluxForge.Tests/FluxForge.Tests.csproj" />
+  </Folder>
+  <Folder Name="/tools/">
+    <Project Path="tools/FluxForge.FakeGw/FluxForge.FakeGw.csproj" />
+  </Folder>
+</Solution>

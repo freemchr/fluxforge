@@ -1,0 +1,73 @@
+<UserControl x:Class="FluxForge.Desktop.Views.ToolsSetupView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+             xmlns:vm="clr-namespace:FluxForge.Desktop.ViewModels"
+             xmlns:v="clr-namespace:FluxForge.Desktop.Views"
+             mc:Ignorable="d"
+             d:DataContext="{d:DesignInstance vm:ToolsSetupViewModel}">
+    <StackPanel>
+        <!-- Step A: choose how to get host tools -->
+        <StackPanel Visibility="{Binding Offer, Converter={StaticResource VisibleWhen}, ConverterParameter=invert}">
+            <WrapPanel>
+                <ui:Button Appearance="Primary" Content="Install official host tools…" Icon="{ui:SymbolIcon ArrowDownload24}"
+                           Command="{Binding PrepareInstallCommand}" Margin="0,0,8,8" />
+                <ui:Button Content="Import downloaded ZIP…" Icon="{ui:SymbolIcon FolderZip24}" Command="{Binding ImportZipCommand}" Margin="0,0,8,8" />
+                <ui:Button Content="Use my own gw.exe…" Icon="{ui:SymbolIcon Folder24}" Command="{Binding UseOwnCommand}" Margin="0,0,8,8" />
+            </WrapPanel>
+            <TextBlock Style="{StaticResource FfSubtitle}" FontSize="12"
+                       Text="FluxForge never downloads anything until you approve it. No administrator rights are needed." />
+        </StackPanel>
+
+        <!-- Step B: explicit approval with full provenance -->
+        <Border Visibility="{Binding Offer, Converter={StaticResource VisibleWhen}}" Padding="14" CornerRadius="6"
+                BorderThickness="1" BorderBrush="{StaticResource FfAccentBrush}" Background="{DynamicResource CardBackgroundFillColorSecondaryBrush}">
+            <StackPanel>
+                <TextBlock Text="Review before installing" Style="{StaticResource FfSectionHeader}" />
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="110" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition /><RowDefinition />
+                    </Grid.RowDefinitions>
+                    <TextBlock Grid.Row="0" Text="Publisher" Style="{StaticResource FfLabel}" />
+                    <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding Publisher}" Style="{StaticResource FfBody}" Margin="0,10,0,4" />
+                    <TextBlock Grid.Row="1" Text="Release" Style="{StaticResource FfLabel}" />
+                    <TextBlock Grid.Row="1" Grid.Column="1" Style="{StaticResource FfBody}" Margin="0,10,0,4">
+                        <Run Text="{Binding Offer.Name, Mode=OneWay}" /> <Run Text="{Binding Offer.PublishedAt, StringFormat='(published {0:d MMM yyyy})', Mode=OneWay}" />
+                    </TextBlock>
+                    <TextBlock Grid.Row="2" Text="Source" Style="{StaticResource FfLabel}" />
+                    <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Offer.HtmlUrl, Mode=OneWay}" IsReadOnly="True" Margin="0,4" />
+                    <TextBlock Grid.Row="3" Text="File" Style="{StaticResource FfLabel}" />
+                    <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding OfferSize}" Style="{StaticResource FfBody}" Margin="0,10,0,4" />
+                    <TextBlock Grid.Row="4" Text="Install to" Style="{StaticResource FfLabel}" />
+                    <TextBox Grid.Row="4" Grid.Column="1" Text="{Binding TargetFolder, Mode=OneWay}" IsReadOnly="True" Margin="0,4" />
+                    <TextBlock Grid.Row="5" Text="Checks" Style="{StaticResource FfLabel}" />
+                    <TextBlock Grid.Row="5" Grid.Column="1" Style="{StaticResource FfSubtitle}" Margin="0,10,0,4"
+                               Text="HTTPS from GitHub only · size and SHA-256 digest checked when GitHub publishes one · archive scanned for unsafe paths · self-test before activation · your previous version is kept for rollback." />
+                </Grid>
+                <WrapPanel Margin="0,12,0,0">
+                    <ui:Button Appearance="Primary" Content="Download and install" Icon="{ui:SymbolIcon Checkmark24}"
+                               Command="{Binding InstallCommand}" Margin="0,0,8,0" />
+                    <ui:Button Content="Not now" Command="{Binding DismissOfferCommand}" />
+                </WrapPanel>
+            </StackPanel>
+        </Border>
+
+        <StackPanel Margin="0,10,0,0" Visibility="{Binding ProgressText, Converter={StaticResource VisibleWhen}}">
+            <TextBlock Text="{Binding ProgressText}" Style="{StaticResource FfSubtitle}" Margin="0,0,0,4" />
+            <ProgressBar Height="4" Value="{Binding ProgressValue}" IsIndeterminate="{Binding ProgressIndeterminate}" Maximum="100" />
+        </StackPanel>
+
+        <Border Margin="0,10,0,0" Padding="10" CornerRadius="6" BorderThickness="1" BorderBrush="{StaticResource FfErrorBrush}"
+                Visibility="{Binding Error, Converter={StaticResource VisibleWhen}}">
+            <TextBlock Style="{StaticResource FfBody}">
+                <Run Text="✕ " Foreground="{StaticResource FfErrorBrush}" FontWeight="Bold" /><Run Text="{Binding Error, Mode=OneWay}" />
+            </TextBlock>
+        </Border>
+    </StackPanel>
+</UserControl>

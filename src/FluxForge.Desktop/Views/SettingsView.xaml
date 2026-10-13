@@ -1,0 +1,117 @@
+<UserControl x:Class="FluxForge.Desktop.Views.SettingsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+             xmlns:vm="clr-namespace:FluxForge.Desktop.ViewModels"
+             xmlns:v="clr-namespace:FluxForge.Desktop.Views"
+             xmlns:tools="clr-namespace:FluxForge.Application.Tools;assembly=FluxForge.Application"
+             mc:Ignorable="d"
+             d:DataContext="{d:DesignInstance vm:SettingsViewModel}">
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Margin="20,14,20,20" MaxWidth="860" HorizontalAlignment="Left">
+            <TextBlock Text="Settings" Style="{StaticResource FfPageTitle}" Margin="0,0,0,10" />
+
+            <Border Style="{StaticResource FfCard}">
+                <StackPanel>
+                    <TextBlock Text="Greaseweazle host tools" Style="{StaticResource FfSectionHeader}" />
+                    <TextBlock Style="{StaticResource FfBody}">
+                        <Run Text="{Binding State.ToolsStatus.State, Converter={StaticResource Status}, ConverterParameter=glyph, Mode=OneWay}"
+                             Foreground="{Binding State.ToolsStatus.State, Converter={StaticResource Status}, ConverterParameter=brush, Mode=OneWay}" FontWeight="Bold" />
+                        <Run Text="{Binding State.ToolsStatus.Message, Mode=OneWay}" />
+                    </TextBlock>
+                    <TextBlock Text="{Binding State.Tools.ExecutablePath}" Style="{StaticResource FfSubtitle}" FontSize="12" Margin="0,4,0,12" />
+
+                    <v:ToolsSetupView DataContext="{Binding Setup}" />
+
+                    <WrapPanel Margin="0,12,0,0">
+                        <ui:Button Content="Check for updates" Icon="{ui:SymbolIcon ArrowSync24}" Command="{Binding CheckForUpdatesCommand}" Margin="0,0,8,0" />
+                        <ui:Button Content="Re-detect" Command="{Binding RefreshCommand}" Margin="0,0,8,0" />
+                        <ui:Button Content="Roll back to previous version" Icon="{ui:SymbolIcon ArrowUndo24}" Command="{Binding Setup.RollbackCommand}" />
+                    </WrapPanel>
+                    <TextBlock Text="{Binding State.UpdateCheckMessage}" Style="{StaticResource FfSubtitle}" Margin="0,8,0,0" />
+
+                    <TextBlock Text="Managed versions" Style="{StaticResource FfLabel}" Margin="0,16,0,4" />
+                    <TextBlock Text="None installed by FluxForge." Style="{StaticResource FfSubtitle}"
+                               Visibility="{Binding ManagedVersions.Count, Converter={StaticResource VisibleWhen}, ConverterParameter=invert}" />
+                    <ItemsControl ItemsSource="{Binding ManagedVersions}" Focusable="False">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate DataType="{x:Type tools:ManagedVersion}">
+                                <TextBlock Style="{StaticResource FfBody}" Margin="0,2">
+                                    <Run Text="{Binding Version, Mode=OneWay}" FontWeight="SemiBold" />
+                                    <Run Text="{Binding Directory, Mode=OneWay}" Foreground="{DynamicResource TextFillColorTertiaryBrush}" FontSize="12" />
+                                    <Run Text="active" Foreground="{StaticResource FfSuccessBrush}">
+                                        <Run.Style>
+                                            <Style TargetType="Run">
+                                                <Setter Property="Text" Value="" />
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsActive}" Value="True"><Setter Property="Text" Value="  ● active" /></DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Run.Style>
+                                    </Run>
+                                </TextBlock>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+
+                    <StackPanel Visibility="{Binding CustomGwPath, Converter={StaticResource VisibleWhen}}" Margin="0,12,0,0">
+                        <TextBlock Text="Your own installation (FluxForge never modifies it)" Style="{StaticResource FfLabel}" />
+                        <DockPanel>
+                            <ui:Button DockPanel.Dock="Right" Content="Stop using" Command="{Binding ClearCustomPathCommand}" Margin="8,0,0,0" />
+                            <TextBox Text="{Binding CustomGwPath, Mode=OneWay}" IsReadOnly="True" />
+                        </DockPanel>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <Border Style="{StaticResource FfCard}">
+                <StackPanel>
+                    <TextBlock Text="Device" Style="{StaticResource FfSectionHeader}" />
+                    <TextBlock Text="COM port (leave empty to let gw find the board)" Style="{StaticResource FfLabel}" Margin="0,0,0,4" />
+                    <DockPanel>
+                        <ui:Button DockPanel.Dock="Right" Content="Save and detect" Command="{Binding SaveDevicePortCommand}" Margin="8,0,0,0" />
+                        <TextBox Text="{Binding DevicePort, UpdateSourceTrigger=PropertyChanged}" AutomationProperties.Name="COM port" />
+                    </DockPanel>
+                    <TextBlock Style="{StaticResource FfSubtitle}" FontSize="12" Margin="0,8,0,0"
+                               Text="On Windows 10 and 11 the Greaseweazle normally appears as a USB serial (COM) device with the built-in driver. FluxForge never installs drivers. Firmware updates will be offered only through the Drive Tools firmware assistant, always with explicit confirmation." />
+                </StackPanel>
+            </Border>
+
+            <Border Style="{StaticResource FfCard}">
+                <StackPanel>
+                    <TextBlock Text="Appearance" Style="{StaticResource FfSectionHeader}" />
+                    <CheckBox IsChecked="{Binding IsDarkTheme}" Content="Dark theme" />
+                </StackPanel>
+            </Border>
+
+            <Border Style="{StaticResource FfCard}">
+                <StackPanel>
+                    <TextBlock Text="Data and privacy" Style="{StaticResource FfSectionHeader}" />
+                    <TextBlock Style="{StaticResource FfBody}" Margin="0,0,0,8"
+                               Text="Everything stays on this PC. The only network traffic is the daily host-tools release check and downloads you approve." />
+                    <DockPanel>
+                        <ui:Button DockPanel.Dock="Right" Content="Open" Command="{Binding OpenDataFolderCommand}" Margin="8,0,0,0" />
+                        <TextBox Text="{Binding DataFolder, Mode=OneWay}" IsReadOnly="True" />
+                    </DockPanel>
+                </StackPanel>
+            </Border>
+
+            <Border Style="{StaticResource FfCard}">
+                <StackPanel>
+                    <TextBlock Text="About" Style="{StaticResource FfSectionHeader}" />
+                    <TextBlock Style="{StaticResource FfBody}" Text="{Binding AppVersion, StringFormat='FluxForge {0} — preview build'}" />
+                    <TextBlock Style="{StaticResource FfSubtitle}" Margin="0,4,0,8"
+                               Text="FluxForge is an independent frontend and is not an official Greaseweazle product. Greaseweazle is created by Keir Fraser." />
+                    <WrapPanel>
+                        <ui:Button Appearance="Transparent" Content="Greaseweazle on GitHub" Command="{Binding OpenLinkCommand}"
+                                   CommandParameter="https://github.com/keirf/greaseweazle" Margin="0,0,8,0" />
+                        <ui:Button Appearance="Transparent" Content="Greaseweazle wiki" Command="{Binding OpenLinkCommand}"
+                                   CommandParameter="https://github.com/keirf/greaseweazle/wiki" />
+                    </WrapPanel>
+                </StackPanel>
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>
