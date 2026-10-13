@@ -21,19 +21,33 @@ param(
 $ErrorActionPreference = 'Stop'
 $env:PYTHONUNBUFFERED = '1'
 
+# Fixtures are shared in the repo: strip the board serial number and local paths.
+function Protect-Fixture([string] $Path) {
+    if (-not (Test-Path $Path)) { return }
+    $text = Get-Content -Raw $Path
+    if (-not $text) { return }
+    $text = $text -replace '(Serial:\s*)\S+', '$1REDACTED'
+    $text = $text.Replace($Gw, 'gw.exe').Replace($script:target, '<fixture>')
+    Set-Content -NoNewline -Path $Path -Value $text
+}
+
 function Invoke-Gw([string] $Name, [string[]] $Arguments) {
     $dir = Join-Path $script:target $Name
     New-Item -ItemType Directory -Force -Path $dir | Out-Null
     $sw = [Diagnostics.Stopwatch]::StartNew()
     $p = Start-Process -FilePath $Gw -ArgumentList $Arguments -NoNewWindow -PassThru -Wait `
         -RedirectStandardOutput (Join-Path $dir 'stdout.txt') -RedirectStandardError (Join-Path $dir 'stderr.txt')
+    foreach ($f in 'stdout.txt', 'stderr.txt') { Protect-Fixture (Join-Path $dir $f) }
     @{ args = $Arguments; exitCode = $p.ExitCode; seconds = [math]::Round($sw.Elapsed.TotalSeconds, 2) } |
         ConvertTo-Json | Set-Content (Join-Path $dir 'meta.json')
     "{0,-28} exit {1}" -f $Name, $p.ExitCode
 }
 
-# Version first so fixtures are filed by host-tools version.
+# Version first so fixtures are filed by host-tools version. gw prints this line on stderr, which
+# Windows PowerShell turns into an error record, so relax error handling for this one call.
+$ErrorActionPreference = 'Continue'
 $info = & $Gw info 2>&1 | Out-String
+$ErrorActionPreference = 'Stop'
 $version = if ($info -match 'Host Tools:\s*v?([\d.]+)') { $Matches[1] } else { 'unknown' }
 $script:target = Join-Path $OutRoot "gw-$version\$Scenario"
 New-Item -ItemType Directory -Force -Path $script:target | Out-Null

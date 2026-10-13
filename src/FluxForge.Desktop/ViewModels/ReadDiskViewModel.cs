@@ -41,7 +41,7 @@ public sealed partial class ReadDiskViewModel : ObservableObject, IPageLifecycle
 
     public AppState State { get; }
     public IReadOnlyList<ProfileOption> Profiles { get; }
-    public IReadOnlyList<string> Drives { get; } = ["A", "B", "0", "1", "2"];
+    public IReadOnlyList<string> Drives { get; } = ["A", "B", "0", "1", "2", "3"];
     public IReadOnlyList<string> RevolutionChoices { get; } = ["Default", "1", "2", "3", "5", "8"];
     public IReadOnlyList<string> RetryChoices { get; } = ["Default", "0", "1", "3", "5", "10", "20"];
     public TrackMapViewModel TrackMap { get; } = new();

@@ -52,7 +52,7 @@ public sealed partial class JobConsoleViewModel : ObservableObject
 
     public void Append(OutputLine line)
     {
-        _log.AppendLine(line.Stream == OutputStream.StdErr ? "! " + line.Text : line.Text);
+        _log.AppendLine(line.Text); // gw writes everything to stderr; show it verbatim
         if (_log.Length > MaxChars) _log.Remove(0, _log.Length - MaxChars);
         _dirty = true;
         if (!_timer.IsEnabled) FlushLog(); // late lines delivered after the job ended

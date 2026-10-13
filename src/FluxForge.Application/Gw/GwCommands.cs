@@ -121,8 +121,8 @@ public static class GwCommands
         if (!string.IsNullOrWhiteSpace(target.Drive))
         {
             var drive = target.Drive.Trim().ToUpperInvariant();
-            if (drive is not ("A" or "B" or "0" or "1" or "2"))
-                throw new GwCommandException($"Unsupported drive selection '{target.Drive}'. Use A, B, 0, 1 or 2.");
+            if (drive is not ("A" or "B" or "0" or "1" or "2" or "3"))
+                throw new GwCommandException($"Unsupported drive selection '{target.Drive}'. Use A, B (PC bus) or 0-3 (Shugart bus).");
             args.Add("--drive=" + drive);
         }
     }

@@ -214,9 +214,10 @@ public sealed class JobRunner(IProcessRunner runner, IJobStore store, TimeProvid
         return (JobStatus.Succeeded, "Write finished and gw's built-in verification reported no errors.");
     }
 
+    // gw writes all of its output (progress included) to stderr, so stream alone doesn't mark an error.
     private static string LastError(ProcessResult result) =>
-        result.Lines.LastOrDefault(l => l.Stream == OutputStream.StdErr && l.Text.Trim().Length > 0)?.Text.Trim()
-        ?? result.Lines.LastOrDefault(l => l.Text.Contains("ERROR", StringComparison.OrdinalIgnoreCase))?.Text.Trim()
+        result.Lines.LastOrDefault(l => l.Text.Contains("ERROR", StringComparison.OrdinalIgnoreCase))?.Text.Trim().TrimStart('*', ' ')
+        ?? result.Lines.LastOrDefault(l => l.Text.Trim().Length > 0)?.Text.Trim()
         ?? "";
 
     private JobRecord NewRecord(JobKind kind, string title, HostToolsInstallation tools, GwInfo? device, IReadOnlyList<string> args) => new()

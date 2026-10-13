@@ -35,7 +35,7 @@ public sealed partial class WriteDiskViewModel : ObservableObject, IPageLifecycl
     }
 
     public AppState State { get; }
-    public IReadOnlyList<string> Drives { get; } = ["A", "B", "0", "1", "2"];
+    public IReadOnlyList<string> Drives { get; } = ["A", "B", "0", "1", "2", "3"];
     public TrackMapViewModel TrackMap { get; } = new();
     public JobConsoleViewModel Console { get; } = new();
 
