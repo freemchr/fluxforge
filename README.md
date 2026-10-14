@@ -33,12 +33,30 @@ and tells you the truth about every disk: what was recovered, what wasn't, and w
   fingerprints, where it came from and how it went, ready to search, tag and re-check.
 - **Recover without touching the disk again.** Decode any saved raw capture into a sector image with
   a different format in Image Studio. Fragile disks only need to be read once.
+- **Safe firmware updates.** See whether your Greaseweazle's firmware is current and update it with a
+  typed confirmation, a check of the result and a link to the official recovery guide.
 
 ## Screenshots
 
 <p align="center"><img src="docs/screenshots/home.png" alt="FluxForge home screen: host tools ready, Greaseweazle V4.1 connected, quick actions and recent activity" width="820"></p>
 
-Every feature below has its own screenshot, all taken from real runs on a Greaseweazle V4.1.
+| [Read a disk](#read-floppy-disks-backup-and-preservation) | [Verify against an image](#verify-a-disk-against-an-image) | [Library](#library-catalogue-your-disks) |
+|:---:|:---:|:---:|
+| <a href="#read-floppy-disks-backup-and-preservation"><img src="docs/screenshots/read.png" alt="Read Disk" width="270"></a> | <a href="#verify-a-disk-against-an-image"><img src="docs/screenshots/verify.png" alt="Verify" width="270"></a> | <a href="#library-catalogue-your-disks"><img src="docs/screenshots/library.png" alt="Library" width="270"></a> |
+| [**Image Studio**](#image-studio-decode-raw-flux-captures) | [**Drive Tools**](#drive-tools) | [**Activity**](#device-and-diagnostics) |
+| <a href="#image-studio-decode-raw-flux-captures"><img src="docs/screenshots/image-studio.png" alt="Image Studio" width="270"></a> | <a href="#drive-tools"><img src="docs/screenshots/drive-tools.png" alt="Drive Tools" width="270"></a> | <a href="#device-and-diagnostics"><img src="docs/screenshots/activity.png" alt="Activity" width="270"></a> |
+
+Every feature below has its own full-size screenshot, all taken from real runs on a Greaseweazle V4.1.
+
+## What's new in 1.0
+
+- **Verify:** read a disk and compare it sector by sector with an image or a raw capture.
+- **Library:** a searchable catalogue of your disks and images, filled automatically as you work.
+- **Firmware assistant:** check and update the Greaseweazle firmware from Drive Tools.
+- Clearer Activity list, the COM port in use shown in Settings, and a refreshed blue look to match the logo.
+
+Upgrading from 0.1.0? FluxForge offers the update itself (Settings, About), and your existing job
+history is added to the Library the first time you open it.
 
 ## Features
 
@@ -163,6 +181,9 @@ planned. Copy-protected disks should be captured as raw flux (`.scp`).
 2. Connect your Greaseweazle by USB. FluxForge detects the board and firmware.
 3. Click **Back Up Disk**, pick the disk format, and choose **Preservation (raw flux)** for anything
    irreplaceable. If reads fail with "Track 0 not found", set the drive to **B**.
+4. Open **Library** to name the disk, note its condition and add tags. Every backup lands there automatically.
+5. After writing an image to a floppy, use **Verify against this image** to read it back and compare
+   every sector.
 
 ## FAQ
 
@@ -177,6 +198,19 @@ on Gotek / FlashFloppy. FluxForge can make a sector image from a raw capture lat
 
 **My Atari ST disk "struggles" in other tools.**
 It may be a 10-sector (800K) or 11-sector (880K) disk. FluxForge detects this and suggests the matching format.
+
+**How do I check that a copied disk is good?**
+Use **Verify**: choose the image the disk should match and FluxForge reads the disk and compares every
+sector. It lists any sector that differs or can't be read, and nothing is written to the disk.
+
+**Does the Library move or copy my images?**
+No. Images stay where you saved them. The Library is a small database in FluxForge's data folder that
+stores only paths, SHA-256 fingerprints and your notes. **Check files** tells you if an image has
+changed or gone missing.
+
+**Can FluxForge update my Greaseweazle firmware?**
+Yes, from **Drive Tools → Greaseweazle firmware**. It shows your version next to the latest official
+release and only updates after you type UPDATE and confirm. It never touches the bootloader.
 
 **Can I use an older Greaseweazle version?**
 Yes. Settings → Host tools versions lists every stable release; install or switch between them.
@@ -194,6 +228,8 @@ When reporting a problem, attach the job report from **Activity → Export repor
 If FluxForge saved one of your disks, you can [buy me a coffee](https://buymeacoffee.com/cjf077) ☕
 
 ## License
+
+Developed by **Chris Freeman** ([@freemchr](https://github.com/freemchr)).
 
 FluxForge is free and open source under the [MIT License](LICENSE). It is provided as is, without
 warranty: always keep a raw capture of disks that matter before writing to them. Greaseweazle and the
