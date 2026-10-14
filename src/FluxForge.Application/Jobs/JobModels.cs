@@ -50,6 +50,9 @@ public sealed record JobRecord
     public IReadOnlyList<JobArtifact> Artifacts { get; init; } = [];
     public IReadOnlyList<TrackObservation> Tracks { get; init; } = [];
     public SectorSummary? Sectors { get; init; }
+
+    /// <summary>Format that better fits the disk, when sectors fell outside the selected one.</summary>
+    public string? SuggestedProfileId { get; init; }
     public string? LogPath { get; init; }
     public string AppVersion { get; init; } = typeof(JobRecord).Assembly.GetName().Version?.ToString() ?? "0";
 }

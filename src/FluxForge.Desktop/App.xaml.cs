@@ -55,6 +55,7 @@ public partial class App
         services.AddSingleton<HomeViewModel>();
         services.AddSingleton<ReadDiskViewModel>();
         services.AddSingleton<WriteDiskViewModel>();
+        services.AddSingleton<ImageStudioViewModel>();
         services.AddSingleton<ActivityViewModel>();
         services.AddSingleton<SettingsViewModel>();
         services.AddSingleton<MainWindow>();

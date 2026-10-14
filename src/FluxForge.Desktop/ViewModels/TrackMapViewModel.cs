@@ -62,7 +62,7 @@ public sealed partial class TrackMapViewModel : ObservableObject
     public partial TrackCellViewModel? Selected { get; set; }
 
     private static readonly TrackStatus[] ReadLegend =
-        [TrackStatus.NotRead, TrackStatus.Reading, TrackStatus.DecodedOk, TrackStatus.RecoveredAfterRetry, TrackStatus.Unreadable, TrackStatus.FluxCapturedDecodeUnknown];
+        [TrackStatus.NotRead, TrackStatus.Reading, TrackStatus.DecodedOk, TrackStatus.RecoveredAfterRetry, TrackStatus.Unreadable, TrackStatus.ExtraSectors, TrackStatus.FluxCapturedDecodeUnknown];
     private static readonly TrackStatus[] WriteLegend =
         [TrackStatus.NotRead, TrackStatus.Writing, TrackStatus.Written, TrackStatus.Verified];
 

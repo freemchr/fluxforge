@@ -187,7 +187,8 @@ public class RealAtariStTests
         Assert.Equal(new SectorSummary(1440, 1440), t.Summary);
         Assert.Equal(160, t.UnexpectedSectors);
         Assert.Equal(10, t.HighestUnexpectedSector);
-        Assert.All(t.Tracks, x => Assert.Equal(TrackStatus.DecodedOk, x.Status));
+        // Every expected sector decoded, but each track also holds sector 10: never shown as plain "Decoded OK".
+        Assert.All(t.Tracks, x => Assert.Equal(TrackStatus.ExtraSectors, x.Status));
     }
 
     [Fact]

@@ -10,6 +10,8 @@ public enum TrackStatus
     Unreadable,
     FluxCapturedDecodeUnknown,
     NotApplicable,
+    /// <summary>Every expected sector decoded, but the track also holds sectors the format doesn't define (not in a sector image).</summary>
+    ExtraSectors,
     /// <summary>Write in progress on this track.</summary>
     Writing,
     /// <summary>gw reported the track written; verification not (yet) confirmed.</summary>

@@ -175,3 +175,50 @@ public class JobRunnerTests
         Assert.False(jobs.HasActiveJobs);
     }
 }
+
+public class DecodeJobTests
+{
+    private static readonly HostToolsInstallation Tools = new(@"C:\gw\gw.exe", new GwVersion(1, 23), HostToolsSource.Managed, false);
+
+    [Fact]
+    public async Task Decode_converts_capture_without_touching_device_lock()
+    {
+        using var dir = new TempDir();
+        var scp = dir.File("disk.scp");
+        File.WriteAllBytes(scp, [0x53, 0x43, 0x50]);
+        var st800 = new FormatRegistry().Find("atarist-800")!;
+        var runner = new FakeProcessRunner((req, output, _) =>
+        {
+            Assert.Equal(["convert", "--format=atarist.800", scp], req.Arguments.Take(3));
+            File.WriteAllBytes(req.Arguments[^1], new byte[819200]);
+            return Task.FromResult(FakeProcessRunner.Emit(output, 0,
+                "T0.0: IBM MFM (10/10 sectors) from Raw Flux (86555 flux in 400.55ms)", "Found 10 sectors of 10 (100%)"));
+        });
+        var jobs = new JobRunner(runner, new JsonJobStore(new AppPaths(dir.File("home"))));
+
+        var record = await jobs.RunDecodeAsync(new DecodeJob(Tools, scp, dir.File("disk.st"), st800), null, default);
+
+        Assert.Equal(JobStatus.Succeeded, record.Status);
+        Assert.Equal(JobKind.Convert, record.Kind);
+        Assert.Equal(2, record.Artifacts.Count); // source capture + decoded image, both hashed
+        Assert.True(File.Exists(dir.File("disk.st")));
+        Assert.False(jobs.IsDeviceBusy(null));
+    }
+
+    [Fact]
+    public async Task Decode_refuses_non_flux_input_and_existing_output()
+    {
+        using var dir = new TempDir();
+        var adf = dir.File("disk.adf");
+        File.WriteAllBytes(adf, new byte[10]);
+        var amiga = FormatRegistry.BuiltIn.Single(p => p.Id == "amiga-dd");
+        var jobs = new JobRunner(new FakeProcessRunner((_, _, _) => throw new InvalidOperationException("must not run")), new JsonJobStore(new AppPaths(dir.File("home"))));
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() => jobs.RunDecodeAsync(new DecodeJob(Tools, adf, dir.File("out.adf"), amiga), null, default));
+
+        var scp = dir.File("disk.scp");
+        File.WriteAllBytes(scp, [1]);
+        File.WriteAllText(dir.File("taken.adf"), "x");
+        await Assert.ThrowsAsync<InvalidOperationException>(() => jobs.RunDecodeAsync(new DecodeJob(Tools, scp, dir.File("taken.adf"), amiga), null, default));
+    }
+}

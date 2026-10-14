@@ -20,6 +20,7 @@
         <DataTemplate DataType="{x:Type vm:HomeViewModel}"><v:HomeView /></DataTemplate>
         <DataTemplate DataType="{x:Type vm:ReadDiskViewModel}"><v:ReadDiskView /></DataTemplate>
         <DataTemplate DataType="{x:Type vm:WriteDiskViewModel}"><v:WriteDiskView /></DataTemplate>
+        <DataTemplate DataType="{x:Type vm:ImageStudioViewModel}"><v:ImageStudioView /></DataTemplate>
         <DataTemplate DataType="{x:Type vm:ActivityViewModel}"><v:ActivityView /></DataTemplate>
         <DataTemplate DataType="{x:Type vm:SettingsViewModel}"><v:SettingsView /></DataTemplate>
         <DataTemplate DataType="{x:Type vm:PlaceholderViewModel}"><v:PlaceholderView /></DataTemplate>

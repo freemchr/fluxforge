@@ -14,6 +14,9 @@ public sealed record ReadJob(HostToolsInstallation Tools, ReadRequest Request, G
 
 public sealed record WriteJob(HostToolsInstallation Tools, WriteRequest Request, GwInfo? Device);
 
+/// <summary>Decode a raw flux capture into a sector image with <c>gw convert</c>. No hardware involved.</summary>
+public sealed record DecodeJob(HostToolsInstallation Tools, string InputPath, string OutputPath, DiskProfile Profile);
+
 public interface IJobActivity
 {
     bool HasActiveJobs { get; }
@@ -56,6 +59,71 @@ public sealed class JobRunner(IProcessRunner runner, IJobStore store, TimeProvid
 
     public Task<JobRecord> RunWriteAsync(WriteJob job, IProgress<JobProgress>? progress, CancellationToken ct) =>
         WithDeviceAsync(job.Request.Target.Port, () => WriteCoreAsync(job, progress, ct));
+
+    /// <summary>
+    /// Offline decode. Doesn't take the device lock (no hardware), but counts as an active job so host
+    /// tools can't be swapped underneath it.
+    /// </summary>
+    public async Task<JobRecord> RunDecodeAsync(DecodeJob job, IProgress<JobProgress>? progress, CancellationToken ct)
+    {
+        Interlocked.Increment(ref _active);
+        try { return await DecodeCoreAsync(job, progress, ct).ConfigureAwait(false); }
+        finally { Interlocked.Decrement(ref _active); }
+    }
+
+    private async Task<JobRecord> DecodeCoreAsync(DecodeJob job, IProgress<JobProgress>? progress, CancellationToken ct)
+    {
+        var input = Path.GetFullPath(job.InputPath);
+        if (!File.Exists(input))
+            throw new InvalidOperationException("The raw capture file was not found.");
+        if (!GwCommands.RawFluxExtensions.Contains(Path.GetExtension(input)))
+            throw new InvalidOperationException("Choose a raw flux capture (.scp) to decode.");
+
+        var finalPath = Path.GetFullPath(job.OutputPath);
+        var blocking = OutputGuard.CheckReadOutput(finalPath, CaptureMode.SectorImage, job.Profile, FreeSpace).Where(i => i.Blocking).ToList();
+        if (blocking.Count > 0)
+            throw new InvalidOperationException(string.Join(Environment.NewLine, blocking.Select(i => i.Message)));
+        if (!string.Equals(Path.GetExtension(finalPath), job.Profile.SectorExtension, StringComparison.OrdinalIgnoreCase))
+            throw new InvalidOperationException($"{job.Profile.DisplayName} images use {job.Profile.SectorExtension}.");
+
+        var stagingDir = Path.Combine(Path.GetDirectoryName(finalPath)!, ".fluxforge-partial");
+        Directory.CreateDirectory(stagingDir).Attributes |= FileAttributes.Hidden;
+        var tempPath = Path.Combine(stagingDir, $"{Guid.NewGuid():N}{Path.GetExtension(finalPath)}");
+        var args = GwCommands.Convert(input, tempPath, job.Profile);
+
+        var source = await ArtifactAsync(input, ArtifactKind.RawFlux, true, ct).ConfigureAwait(false);
+        var record = NewRecord(JobKind.Convert, $"Decode {Path.GetFileName(input)} as {job.Profile.System} {job.Profile.DisplayName}", job.Tools, null, args) with
+        {
+            ProfileId = job.Profile.Id,
+            GwFormat = job.Profile.GwFormat,
+            CaptureMode = CaptureMode.SectorImage,
+        };
+
+        var tracker = new TrackProgressTracker();
+        var sw = Stopwatch.StartNew();
+        progress?.Report(new JobProgress(JobStatus.Running, TimeSpan.Zero));
+        var lines = new SyncProgress<OutputLine>(line =>
+        {
+            var track = tracker.Feed(line.Text); // always parse, even with no UI listening
+            progress?.Report(new JobProgress(JobStatus.Running, sw.Elapsed, line, track));
+        });
+        var result = await runner.RunAsync(new ProcessRequest(job.Tools.ExecutablePath, args, Timeout: TimeSpan.FromMinutes(10)), lines, ct).ConfigureAwait(false);
+        tracker.Finish();
+
+        var outputExists = File.Exists(tempPath) && new FileInfo(tempPath).Length > 0;
+        var (status, detail) = EvaluateRead(result, tracker, CaptureMode.SectorImage, job.Profile, outputExists, fromRawCapture: true);
+        var artifacts = new List<JobArtifact> { source };
+        if (outputExists)
+        {
+            var complete = status is JobStatus.Succeeded or JobStatus.Partial or JobStatus.CompletedUnverified;
+            var destination = complete ? finalPath : OutputGuard.IncompleteName(finalPath);
+            File.Move(tempPath, destination, overwrite: false);
+            artifacts.Add(await ArtifactAsync(destination, ArtifactKind.SectorImage, complete, CancellationToken.None).ConfigureAwait(false));
+        }
+        TryDelete(tempPath);
+        TryDeleteEmptyDir(stagingDir);
+        return await FinishAsync(record, result, status, detail, tracker, artifacts, progress).ConfigureAwait(false);
+    }
 
     private SemaphoreSlim Lock(string? port) => _deviceLocks.GetOrAdd(port ?? "auto", _ => new SemaphoreSlim(1, 1));
 
@@ -162,6 +230,9 @@ public sealed class JobRunner(IProcessRunner runner, IJobStore store, TimeProvid
             Artifacts = artifacts,
             Tracks = [.. tracker.Tracks.OrderBy(t => t.Cylinder).ThenBy(t => t.Head)],
             Sectors = tracker.Summary,
+            SuggestedProfileId = tracker.UnexpectedSectors > 0 && record.ProfileId is { } id && new FormatRegistry().Find(id) is { } chosen
+                ? new FormatRegistry().SuggestForExtraSectors(chosen, tracker.HighestUnexpectedSector)?.Id
+                : null,
         };
         // The audit record is saved even if the caller cancelled.
         final = await store.SaveAsync(final, result.Lines, CancellationToken.None).ConfigureAwait(false);
@@ -170,7 +241,7 @@ public sealed class JobRunner(IProcessRunner runner, IJobStore store, TimeProvid
     }
 
     public static (JobStatus Status, string Detail) EvaluateRead(ProcessResult result, TrackProgressTracker tracker,
-        CaptureMode mode, DiskProfile? profile, bool outputExists)
+        CaptureMode mode, DiskProfile? profile, bool outputExists, bool fromRawCapture = false)
     {
         if (result.Cancelled)
             return (JobStatus.Cancelled, "Cancelled. Any captured data is incomplete and labelled as such.");
@@ -201,7 +272,9 @@ public sealed class JobRunner(IProcessRunner runner, IJobStore store, TimeProvid
             var what = $"The disk has {tracker.UnexpectedSectors:N0} sector(s) on {tracks} track(s) beyond what {profile.GwFormat} defines (up to sector {tracker.HighestUnexpectedSector}).{suggestion}";
             return mode == CaptureMode.Preservation
                 ? (JobStatus.CompletedUnverified, $"{prefix}{what} The raw capture includes them — decode it with the right format instead of reading the disk again.")
-                : (JobStatus.Partial, $"{what} They are NOT in this image. Read again with the matching format, or make a raw capture.");
+                : (JobStatus.Partial, fromRawCapture
+                    ? $"{what} They are NOT in this image. Decode the capture again with the matching format."
+                    : $"{what} They are NOT in this image. Read again with the matching format, or make a raw capture.");
         }
         if (unreadable > 0 || tracker.Summary is { Complete: false })
         {

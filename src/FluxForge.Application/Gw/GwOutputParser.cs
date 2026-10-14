@@ -204,6 +204,8 @@ public sealed class TrackProgressTracker
         {
             if (t.Status == TrackStatus.Reading && t.SectorsTotal is { } total && t.SectorsFound < total)
                 _tracks[key] = t with { Status = TrackStatus.Unreadable };
+            else if (t.Status is TrackStatus.DecodedOk or TrackStatus.RecoveredAfterRetry && t.UnexpectedSectors > 0)
+                _tracks[key] = t with { Status = TrackStatus.ExtraSectors };
             else if (t.Status == TrackStatus.Written && AllTracksVerified && FatalError is null)
                 _tracks[key] = t with { Status = TrackStatus.Verified };
         }

@@ -29,8 +29,6 @@ public sealed partial class ShellViewModel(IServiceProvider services, AppState s
     {
         [Pages.Verify] = new PlaceholderViewModel("Verify", "Phase 2 · v1.0",
             "Backend-supported verification and independent readback comparison. Flux byte comparison is never labelled physical verification."),
-        [Pages.ImageStudio] = new PlaceholderViewModel("Image Studio", "Phase 2 · v1.0",
-            "Inspect and convert images using only the directional conversions your installed host tools support."),
         [Pages.Library] = new PlaceholderViewModel("Library", "Phase 2 · v1.0",
             "Catalogue disks with hashes, provenance, condition notes, tags and scans. Every job is already recorded under Activity."),
         [Pages.DriveTools] = new PlaceholderViewModel("Drive Tools", "Phase 2 · v1.0",
@@ -51,6 +49,7 @@ public sealed partial class ShellViewModel(IServiceProvider services, AppState s
             Pages.Home => services.GetRequiredService<HomeViewModel>(),
             Pages.Read => services.GetRequiredService<ReadDiskViewModel>(),
             Pages.Write => services.GetRequiredService<WriteDiskViewModel>(),
+            Pages.ImageStudio => services.GetRequiredService<ImageStudioViewModel>(),
             Pages.Activity => services.GetRequiredService<ActivityViewModel>(),
             Pages.Settings => services.GetRequiredService<SettingsViewModel>(),
             _ => _placeholders[value.Key],
