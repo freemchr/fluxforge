@@ -41,8 +41,8 @@
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
         <ui:TitleBar Grid.Row="0" Title="FluxForge">
@@ -51,46 +51,7 @@
             </ui:TitleBar.Icon>
         </ui:TitleBar>
 
-        <!-- Top bar: tools, device and firmware are always shown as separate facts. -->
-        <Border Grid.Row="1" Padding="12,4,12,6" BorderThickness="0,0,0,1" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}">
-            <WrapPanel>
-                <Border Style="{StaticResource FfChip}" ToolTip="{Binding State.ToolsStatus.Message}"
-                        AutomationProperties.Name="{Binding State.ToolsSummary, StringFormat='Host tools: {0}'}">
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock FontWeight="Bold" Margin="0,0,6,0"
-                                   Text="{Binding State.ToolsStatus.State, Converter={StaticResource Status}, ConverterParameter=glyph}"
-                                   Foreground="{Binding State.ToolsStatus.State, Converter={StaticResource Status}, ConverterParameter=brush}" />
-                        <TextBlock Text="Host tools  " Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
-                        <TextBlock Text="{Binding State.ToolsSummary}" Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
-                    </StackPanel>
-                </Border>
-                <Border Style="{StaticResource FfChip}" ToolTip="{Binding State.Device.Message}"
-                        AutomationProperties.Name="{Binding State.DeviceSummary, StringFormat='Device: {0}'}">
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock FontWeight="Bold" Margin="0,0,6,0"
-                                   Text="{Binding State.Device.State, Converter={StaticResource Status}, ConverterParameter=glyph}"
-                                   Foreground="{Binding State.Device.State, Converter={StaticResource Status}, ConverterParameter=brush}" />
-                        <TextBlock Text="Device  " Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
-                        <TextBlock Text="{Binding State.DeviceSummary}" Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
-                    </StackPanel>
-                </Border>
-                <Border Style="{StaticResource FfChip}" ToolTip="Firmware compatibility is shown only when it can be detected."
-                        Visibility="{Binding State.Device.Info, Converter={StaticResource VisibleWhen}}">
-                    <TextBlock Text="{Binding State.FirmwareSummary}" Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
-                </Border>
-                <Border Style="{StaticResource FfChip}" BorderBrush="{StaticResource FfSimulatedBrush}"
-                        Visibility="{Binding State.IsSimulated, Converter={StaticResource VisibleWhen}}"
-                        ToolTip="FluxForge is talking to the development fake gw. No real disk is being read or written.">
-                    <TextBlock Text="SIMULATED HARDWARE" FontWeight="SemiBold" Foreground="{StaticResource FfSimulatedBrush}" />
-                </Border>
-                <Border Style="{StaticResource FfChip}" BorderBrush="{StaticResource FfInfoBrush}"
-                        Visibility="{Binding State.UpdateAvailable, Converter={StaticResource VisibleWhen}}">
-                    <TextBlock Text="{Binding State.LatestRelease.Version, StringFormat='Host tools {0} available'}" Foreground="{StaticResource FfInfoBrush}" />
-                </Border>
-            </WrapPanel>
-        </Border>
-
-        <Grid Grid.Row="2">
+        <Grid Grid.Row="1">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="196" />
                 <ColumnDefinition Width="*" />
@@ -143,5 +104,48 @@
                 <ContentControl Content="{Binding CurrentPage}" Focusable="False" />
             </Border>
         </Grid>
+
+        <!-- Status bar: device, firmware and host tools are always shown as separate facts (PRD §6). -->
+        <Border Grid.Row="2" Padding="8,2" BorderThickness="0,1,0,0"
+                BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}"
+                Background="{DynamicResource CardBackgroundFillColorDefaultBrush}">
+            <DockPanel LastChildFill="False">
+                <Button DockPanel.Dock="Left" Style="{StaticResource FfStatusItem}" Command="{Binding DetectDeviceCommand}"
+                        ToolTip="{Binding State.Device.Message}" AutomationProperties.Name="{Binding State.DeviceSummary, StringFormat='Device: {0}. Click to detect again.'}">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="●" Margin="0,0,6,0" VerticalAlignment="Center"
+                                   Foreground="{Binding State.Device.State, Converter={StaticResource Status}, ConverterParameter=brush}" />
+                        <TextBlock Text="{Binding State.DeviceSummary}" />
+                        <TextBlock Margin="6,0,0,0" Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                                   Text="{Binding State.Device.Info.Firmware, StringFormat='· firmware {0}'}"
+                                   Visibility="{Binding State.Device.Info.Firmware, Converter={StaticResource VisibleWhen}}" />
+                    </StackPanel>
+                </Button>
+                <Border DockPanel.Dock="Left" Width="1" Margin="4,5" Background="{DynamicResource CardStrokeColorDefaultBrush}" />
+                <Button DockPanel.Dock="Left" Style="{StaticResource FfStatusItem}" Command="{Binding NavigateCommand}" CommandParameter="settings"
+                        ToolTip="{Binding State.ToolsStatus.Message}" AutomationProperties.Name="{Binding State.ToolsSummary, StringFormat='Host tools: {0}. Click for settings.'}">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Margin="0,0,6,0" FontWeight="Bold"
+                                   Text="{Binding State.ToolsStatus.State, Converter={StaticResource Status}, ConverterParameter=glyph}"
+                                   Foreground="{Binding State.ToolsStatus.State, Converter={StaticResource Status}, ConverterParameter=brush}" />
+                        <TextBlock Text="{Binding State.ToolsSummary, StringFormat='Host tools {0}'}" />
+                    </StackPanel>
+                </Button>
+                <Button DockPanel.Dock="Left" Style="{StaticResource FfStatusItem}" Command="{Binding NavigateCommand}" CommandParameter="settings"
+                        Visibility="{Binding State.UpdateAvailable, Converter={StaticResource VisibleWhen}}">
+                    <TextBlock Foreground="{StaticResource FfInfoBrush}" Text="{Binding State.LatestRelease.Version, StringFormat='↑ {0} available'}" />
+                </Button>
+                <Border DockPanel.Dock="Left" Margin="8,3,0,3" Padding="8,0" CornerRadius="8" BorderThickness="1"
+                        BorderBrush="{StaticResource FfSimulatedBrush}"
+                        Visibility="{Binding State.IsSimulated, Converter={StaticResource VisibleWhen}}"
+                        ToolTip="FluxForge is talking to the development fake gw. No real disk is being read or written.">
+                    <TextBlock Text="SIMULATED HARDWARE" FontSize="11" FontWeight="SemiBold" VerticalAlignment="Center" Foreground="{StaticResource FfSimulatedBrush}" />
+                </Border>
+
+                <TextBlock DockPanel.Dock="Right" Margin="8,0" VerticalAlignment="Center" FontSize="12"
+                           AutomationProperties.LiveSetting="Polite" Text="{Binding ActivityText}"
+                           Foreground="{Binding ActivityBrush}" />
+            </DockPanel>
+        </Border>
     </Grid>
 </ui:FluentWindow>

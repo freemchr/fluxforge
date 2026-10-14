@@ -8,9 +8,39 @@ namespace FluxForge.Desktop.ViewModels;
 
 public sealed record NavItem(string Key, string Title, SymbolRegular Icon, string Shortcut);
 
-public sealed partial class ShellViewModel(IServiceProvider services, AppState state) : ObservableObject, INavigator
+public sealed partial class ShellViewModel : ObservableObject, INavigator
 {
-    public AppState State { get; } = state;
+    private readonly IServiceProvider services;
+
+    public ShellViewModel(IServiceProvider services, AppState state)
+    {
+        this.services = services;
+        State = state;
+        state.PropertyChanged += (_, e) =>
+        {
+            if (e.PropertyName is nameof(AppState.IsJobRunning) or nameof(AppState.IsDetecting) or nameof(AppState.Device) or nameof(AppState.ToolsStatus))
+            {
+                OnPropertyChanged(nameof(ActivityText));
+                OnPropertyChanged(nameof(ActivityBrush));
+            }
+        };
+    }
+
+    public AppState State { get; }
+
+    /// <summary>Right-hand status-bar text: what FluxForge is doing right now.</summary>
+    public string ActivityText =>
+        State.IsJobRunning ? "Job running — don't unplug the Greaseweazle" :
+        State.IsDetecting ? "Detecting Greaseweazle…" :
+        !State.ToolsReady ? "Host tools needed" :
+        State.DeviceReady ? "Ready" : "Waiting for device";
+
+    public System.Windows.Media.Brush ActivityBrush => StatusVisuals.For(
+        State.IsJobRunning ? Application.Jobs.JobStatus.Running :
+        State.DeviceReady && State.ToolsReady ? Application.Jobs.JobStatus.Succeeded : Application.Jobs.JobStatus.Pending).Brush;
+
+    [RelayCommand]
+    private Task DetectDeviceAsync() => State.DetectDeviceAsync();
 
     public IReadOnlyList<NavItem> Items { get; } =
     [
