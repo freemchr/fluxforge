@@ -1,0 +1,8 @@
+{
+    "args":  [
+                 "write",
+                 "--help"
+             ],
+    "exitCode":  0,
+    "seconds":  1.15
+}

@@ -14,7 +14,7 @@ public sealed partial class AppState(IHostToolsManager tools, DeviceService devi
     private static readonly TimeSpan ReleaseCheckInterval = TimeSpan.FromDays(1);
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(Tools), nameof(ToolsReady), nameof(IsSimulated), nameof(UpdateAvailable), nameof(ToolsSummary))]
+    [NotifyPropertyChangedFor(nameof(Tools), nameof(ToolsReady), nameof(IsSimulated), nameof(UpdateAvailable), nameof(ToolsSummary), nameof(ShowUpdatePrompt), nameof(VersionSummary))]
     public partial HostToolsStatus ToolsStatus { get; set; } = new(HostToolsState.Unknown, null, "Checking for Greaseweazle host tools…");
 
     [ObservableProperty]
@@ -22,8 +22,12 @@ public sealed partial class AppState(IHostToolsManager tools, DeviceService devi
     public partial DeviceStatus Device { get; set; } = DeviceStatus.Unknown;
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(UpdateAvailable))]
+    [NotifyPropertyChangedFor(nameof(UpdateAvailable), nameof(ShowUpdatePrompt), nameof(VersionSummary))]
     public partial ReleaseInfo? LatestRelease { get; set; }
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ShowUpdatePrompt))]
+    public partial bool UpdateDismissed { get; set; }
 
     [ObservableProperty]
     public partial bool IsJobRunning { get; set; }
@@ -40,7 +44,44 @@ public sealed partial class AppState(IHostToolsManager tools, DeviceService devi
     public bool IsSimulated => Tools?.IsSimulated == true || Device.Info?.IsSimulated == true;
 
     public bool UpdateAvailable =>
-        LatestRelease is not null && Tools is { Source: HostToolsSource.Managed, Version: { } v } && v < LatestRelease.Version;
+        LatestRelease is not null && Tools is { Version: { } v } && v < LatestRelease.Version;
+
+    /// <summary>
+    /// Ask about an update only for managed installs, when checks are on, and when the user hasn't
+    /// skipped this release or dismissed the prompt this session. Nothing is ever installed silently.
+    /// </summary>
+    public bool ShowUpdatePrompt
+    {
+        get
+        {
+            if (!UpdateAvailable || UpdateDismissed || Tools?.Source != HostToolsSource.Managed) return false;
+            var s = settings.Load();
+            return s.CheckForUpdates && s.SkippedVersion != LatestRelease!.Version.ToString();
+        }
+    }
+
+    public string VersionSummary => (Tools?.Version, LatestRelease?.Version) switch
+    {
+        (null, { } latest) => $"Latest release: {latest}",
+        ({ } mine, { } latest) when mine < latest => $"Version {latest} is available — you're using {mine}.",
+        ({ } mine, { } latest) when mine > latest => $"You're using {mine}, newer than the latest stable release ({latest}).",
+        (_, { } latest) => $"Up to date — {latest} is the latest release.",
+        _ => settings.Load().CheckForUpdates ? "Latest release not checked yet." : "Update checks are turned off.",
+    };
+
+    public void SkipLatestRelease()
+    {
+        if (LatestRelease is null) return;
+        settings.Save(settings.Load() with { SkippedVersion = LatestRelease.Version.ToString() });
+        OnPropertyChanged(nameof(ShowUpdatePrompt));
+    }
+
+    public void SetCheckForUpdates(bool enabled)
+    {
+        settings.Save(settings.Load() with { CheckForUpdates = enabled });
+        OnPropertyChanged(nameof(ShowUpdatePrompt));
+        OnPropertyChanged(nameof(VersionSummary));
+    }
 
     public string ToolsSummary => Tools is { } t ? $"gw {t.Version?.ToString() ?? "?"} ({t.Source.ToString().ToLowerInvariant()})" : "Not installed";
     public string DeviceSummary => Device.Info is { DeviceFound: true } i ? $"{i.Model} · {i.Port}" : StatusVisuals.For(Device.State).Label;
@@ -73,13 +114,18 @@ public sealed partial class AppState(IHostToolsManager tools, DeviceService devi
     public async Task CheckForUpdatesAsync(bool force)
     {
         var s = settings.Load();
-        if (!force && s.LastReleaseCheck is { } last && DateTimeOffset.UtcNow - last < ReleaseCheckInterval)
+        if (!force && !s.CheckForUpdates)
             return;
+        if (!force && s.LastReleaseCheck is { } last && DateTimeOffset.UtcNow - last < ReleaseCheckInterval && s.CachedLatestRelease is not null)
+        {
+            LatestRelease ??= s.CachedLatestRelease;
+            return;
+        }
         try
         {
             LatestRelease = await tools.GetLatestReleaseAsync(CancellationToken.None);
-            UpdateCheckMessage = UpdateAvailable ? $"Greaseweazle host tools {LatestRelease.Version} are available." : $"Latest release: {LatestRelease.Version}.";
-            settings.Save(settings.Load() with { LastReleaseCheck = DateTimeOffset.UtcNow });
+            UpdateCheckMessage = null;
+            settings.Save(settings.Load() with { LastReleaseCheck = DateTimeOffset.UtcNow, CachedLatestRelease = LatestRelease });
         }
         catch (Exception e) { UpdateCheckMessage = "Could not check for updates: " + e.Message; }
     }

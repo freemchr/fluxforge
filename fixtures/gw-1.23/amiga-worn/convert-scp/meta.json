@@ -1,0 +1,10 @@
+{
+    "args":  [
+                 "convert",
+                 "--format=amiga.amigados",
+                 "\\\\wsl.localhost\\Ubuntu-26.04\\home\\freemchr\\github\\fluxforge\\fixtures\\gw-1.23\\amiga-good\\images\\raw-format.scp",
+                 "\\\\wsl.localhost\\Ubuntu-26.04\\home\\freemchr\\github\\fluxforge\\fixtures\\gw-1.23\\amiga-good\\images\\converted.adf"
+             ],
+    "exitCode":  0,
+    "seconds":  22.4
+}

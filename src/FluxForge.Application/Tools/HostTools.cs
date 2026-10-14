@@ -35,5 +35,14 @@ public interface IHostToolsManager
 
     Task<HostToolsStatus> RollbackAsync(CancellationToken ct);
 
+    /// <summary>Stable releases newest first, including older versions.</summary>
+    Task<IReadOnlyList<ReleaseInfo>> GetReleasesAsync(CancellationToken ct);
+
+    /// <summary>Switch to an already-installed managed version (newer or older).</summary>
+    Task<HostToolsStatus> ActivateAsync(string version, CancellationToken ct);
+
+    /// <summary>Delete an inactive managed version.</summary>
+    void Remove(string version);
+
     IReadOnlyList<ManagedVersion> ListManaged();
 }

@@ -68,6 +68,40 @@ public sealed partial class ToolsSetupViewModel(AppState state, IHostToolsManage
     [RelayCommand]
     private void DismissOffer() => Offer = null;
 
+    /// <summary>
+    /// Install a specific release (newer or older) after the user reviews where it comes from.
+    /// Returns true when it was installed and activated.
+    /// </summary>
+    public async Task<bool> ReviewAndInstallAsync(ReleaseInfo release)
+    {
+        if (!CanAct) return false;
+        var current = State.Tools?.Version;
+        var direction = current is not { } v ? ""
+            : release.Version < v ? $"\n\nThis is OLDER than the version you're using ({v}). Use this if you depend on that release's behaviour."
+            : release.Version == v ? $"\n\nThis is the version you're already using."
+            : $"\n\nThis updates you from {v}.";
+        var message =
+            $"Publisher:  {Publisher}\n" +
+            $"Release:    {release.Name} (published {release.PublishedAt:d MMM yyyy})\n" +
+            $"Source:     {release.HtmlUrl}\n" +
+            $"File:       {(release.WindowsAsset is { } a ? $"{a.Name}, {a.Size / 1024.0 / 1024.0:0.0} MB" : "no Windows build in this release")}\n" +
+            $"Install to: {TargetFolder}" +
+            direction +
+            "\n\nIt becomes the active version. Your other installed versions are kept, and you can switch between them in Settings at any time.";
+        if (!await dialogs.ConfirmAsync($"Install Greaseweazle host tools {release.Version}?", message, "Download and install"))
+            return false;
+
+        var ok = false;
+        await RunAsync("Starting download…", async () =>
+        {
+            State.ToolsStatus = await tools.InstallAsync(release, Reporter(), CancellationToken.None);
+            Offer = null;
+            ok = true;
+            await State.DetectDeviceAsync();
+        });
+        return ok;
+    }
+
     [RelayCommand(CanExecute = nameof(CanAct))]
     private async Task ImportZipAsync()
     {

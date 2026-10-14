@@ -6,3 +6,6 @@ obj/
 TestResults/
 artifacts/
 *:Zone.Identifier
+
+# Disk images captured during the spike stay local (often copyrighted software)
+fixtures/**/images/

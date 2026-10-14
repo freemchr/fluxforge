@@ -12,6 +12,15 @@ public sealed record AppSettings
     public string? PreviousManagedVersion { get; init; }
 
     public DateTimeOffset? LastReleaseCheck { get; init; }
+
+    /// <summary>Check GitHub for newer host tools at most once a day. Users who need a fixed version can turn this off.</summary>
+    public bool CheckForUpdates { get; init; } = true;
+
+    /// <summary>A release the user chose not to be reminded about ("Skip this version").</summary>
+    public string? SkippedVersion { get; init; }
+
+    /// <summary>Result of the last successful release check, reused until the next daily check.</summary>
+    public Tools.ReleaseInfo? CachedLatestRelease { get; init; }
     public string? DevicePort { get; init; }
     public string Drive { get; init; } = "A";
     public string? DefaultOutputFolder { get; init; }

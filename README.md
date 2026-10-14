@@ -1,3 +1,5 @@
+<p align="center"><img src="assets/brand/fluxforge-logo.png" alt="FluxForge — Preserve the Past One Disk at a Time" width="720"></p>
+
 # FluxForge
 
 Windows desktop app for imaging, writing and documenting floppy disks with a
@@ -19,6 +21,8 @@ Phase 1 vertical slice, **not yet validated on real hardware** (see the spike ch
   track map, truthful status, `(INCOMPLETE)` labelling on cancel/failure, SHA-256, job record.
 - Write Disk: format confirmation for ambiguous images, explicit acknowledgement + confirmation
   dialog, verify by default, "interrupted = unknown state".
+- Host-tools versions: daily release check that always asks before updating, "skip this version",
+  install/switch to any older stable release, remove unused versions.
 - Activity: searchable job history with exportable text report (optional path redaction).
 - Verify, Image Studio, Library and Drive Tools are placeholders for Phase 2.
 
@@ -55,3 +59,9 @@ dotnet run --project src/FluxForge.Desktop
 
 The fake prints a `FLUXFORGE-SIMULATED` marker; the app then shows **SIMULATED HARDWARE** and
 labels every job and report as simulated. Its "images" are placeholder bytes.
+
+## Brand assets
+
+`assets/brand/`: `fluxforge-logo-original.png` is the master artwork. `fluxforge-logo.png`,
+`fluxforge-icon.png` and `fluxforge-wordmark.png` are transparent cut-outs of it, and
+`fluxforge.ico` is the multi-size app icon (16–256 px).

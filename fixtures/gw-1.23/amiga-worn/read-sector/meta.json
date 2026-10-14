@@ -1,0 +1,10 @@
+{
+    "args":  [
+                 "read",
+                 "--format=amiga.amigados",
+                 "--drive=B",
+                 "\\\\wsl.localhost\\Ubuntu-26.04\\home\\freemchr\\github\\fluxforge\\fixtures\\gw-1.23\\amiga-good\\images\\sector.adf"
+             ],
+    "exitCode":  0,
+    "seconds":  133.57
+}

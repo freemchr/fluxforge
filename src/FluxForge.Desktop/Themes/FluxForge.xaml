@@ -17,6 +17,17 @@
     <SolidColorBrush x:Key="FfEmptyCellBrush" Color="#33808080" />
 
 
+    <!-- Brand: "Flux" in electric blue (matches assets/brand/fluxforge-logo.svg); "Forge" follows the theme text colour. -->
+    <LinearGradientBrush x:Key="FfFluxBrush" StartPoint="0,0" EndPoint="0,1">
+        <GradientStop Offset="0" Color="#5CCBFF" />
+        <GradientStop Offset="1" Color="#0A84FF" />
+    </LinearGradientBrush>
+    <FontFamily x:Key="FfBrandFont">Segoe UI Variable Display, Segoe UI</FontFamily>
+    <!-- Brand artwork (assets/brand). Transparent PNGs derived from fluxforge-logo-original.png. -->
+    <BitmapImage x:Key="FfIcon" UriSource="pack://application:,,,/Assets/fluxforge-icon.png" />
+    <BitmapImage x:Key="FfWordmark" UriSource="pack://application:,,,/Assets/fluxforge-wordmark.png" />
+    <BitmapImage x:Key="FfLogo" UriSource="pack://application:,,,/Assets/fluxforge-logo.png" />
+
     <FontFamily x:Key="FfMonoFont">Cascadia Mono, Consolas, Courier New</FontFamily>
 
     <Style x:Key="FfCard" TargetType="Border">

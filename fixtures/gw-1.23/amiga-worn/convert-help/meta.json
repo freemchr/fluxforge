@@ -1,0 +1,8 @@
+{
+    "args":  [
+                 "convert",
+                 "--help"
+             ],
+    "exitCode":  0,
+    "seconds":  1.33
+}

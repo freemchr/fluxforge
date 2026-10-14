@@ -9,6 +9,7 @@
                  mc:Ignorable="d"
                  d:DataContext="{d:DesignInstance vm:ShellViewModel}"
                  Title="FluxForge"
+                 Icon="pack://application:,,,/Assets/fluxforge.ico"
                  Width="1180" Height="740" MinWidth="900" MinHeight="580" FontSize="13"
                  WindowStartupLocation="CenterScreen"
                  ExtendsContentIntoTitleBar="True"
@@ -43,7 +44,11 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <ui:TitleBar Grid.Row="0" Title="FluxForge — Preserve the past. One disk at a time." />
+        <ui:TitleBar Grid.Row="0" Title="FluxForge">
+            <ui:TitleBar.Icon>
+                <ui:ImageIcon Source="pack://application:,,,/Assets/fluxforge.ico" />
+            </ui:TitleBar.Icon>
+        </ui:TitleBar>
 
         <!-- Top bar: tools, device and firmware are always shown as separate facts. -->
         <Border Grid.Row="1" Padding="12,4,12,6" BorderThickness="0,0,0,1" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}">
@@ -91,6 +96,10 @@
             </Grid.ColumnDefinitions>
 
             <DockPanel Grid.Column="0" Margin="8,8,4,8">
+                <StackPanel DockPanel.Dock="Top" Margin="0,2,0,14" AutomationProperties.Name="FluxForge">
+                    <Image Source="{StaticResource FfIcon}" Width="102" Height="102" RenderOptions.BitmapScalingMode="HighQuality" />
+                    <Image Source="{StaticResource FfWordmark}" Width="172" Margin="0,4,0,0" RenderOptions.BitmapScalingMode="HighQuality" />
+                </StackPanel>
                 <TextBlock DockPanel.Dock="Bottom" Margin="12,8" FontSize="11" TextWrapping="Wrap"
                            Foreground="{DynamicResource TextFillColorTertiaryBrush}"
                            Text="Independent frontend for the official Greaseweazle host tools." />

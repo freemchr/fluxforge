@@ -1,0 +1,6 @@
+{
+  "args": ["read", "--format=amiga.amigados", "--raw", "--drive=B", "<fixture>\\images\\raw-format.scp"],
+  "exitCode": 0,
+  "seconds": 104,
+  "note": "New/known-good AmigaDOS disk on V4.1 + 3.5in PC drive (straight cable, drive B), gw 1.23."
+}

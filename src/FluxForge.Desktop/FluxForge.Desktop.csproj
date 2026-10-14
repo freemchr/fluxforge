@@ -7,12 +7,20 @@
     <AssemblyName>FluxForge</AssemblyName>
     <RootNamespace>FluxForge.Desktop</RootNamespace>
     <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon>Assets\fluxforge.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.13" />
     <PackageReference Include="WPF-UI" Version="4.3.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Assets\fluxforge.ico" />
+    <Resource Include="Assets\fluxforge-icon.png" />
+    <Resource Include="Assets\fluxforge-wordmark.png" />
+    <Resource Include="Assets\fluxforge-logo.png" />
   </ItemGroup>
 
   <ItemGroup>

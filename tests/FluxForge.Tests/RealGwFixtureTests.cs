@@ -67,3 +67,95 @@ public partial class RealGwFixtureTests
     [GeneratedRegex(@"[a-z0-9]+(\.[a-z0-9_]+)+")]
     private static partial Regex DiskdefList();
 }
+
+/// <summary>Real reads of a worn Amiga disk on a V4.1 + 3.5" PC drive (drive B), gw 1.23.</summary>
+public class RealAmigaReadTests
+{
+    private static readonly DiskProfile Amiga = FormatRegistry.BuiltIn.Single(p => p.Id == "amiga-dd");
+
+    private static TrackProgressTracker Replay(string scenario, string capture)
+    {
+        var tracker = new TrackProgressTracker();
+        foreach (var line in File.ReadAllLines(Path.Combine(AppContext.BaseDirectory, "fixtures", "gw-1.23", scenario, capture, "stderr.txt")))
+            tracker.Feed(line);
+        tracker.Finish();
+        return tracker;
+    }
+
+    private static Application.Processes.ProcessResult Exit0 => new(0, [], false, false, TimeSpan.Zero);
+
+    [Fact]
+    public void Sector_read_of_worn_disk_is_partial_with_exact_counts()
+    {
+        var t = Replay("amiga-worn", "read-sector");
+        Assert.Equal(new SectorSummary(1726, 1760), t.Summary);
+        Assert.Equal(160, t.Tracks.Count);
+        Assert.Equal(0, t.UnresolvedTracks);
+        Assert.Null(t.FatalError);
+
+        var (status, detail) = Application.Jobs.JobRunner.EvaluateRead(Exit0, t, CaptureMode.SectorImage, Amiga, outputExists: true);
+        Assert.Equal(Application.Jobs.JobStatus.Partial, status);
+        Assert.Contains("1,726 of 1,760", detail);
+    }
+
+    [Fact]
+    public void Retries_giving_up_and_recovery_are_classified()
+    {
+        var tracks = Replay("amiga-worn", "read-sector").Tracks.ToDictionary(x => (x.Cylinder, x.Head));
+
+        var gaveUp = tracks[(0, 0)];
+        Assert.Equal(TrackStatus.Unreadable, gaveUp.Status);
+        Assert.Equal((10, 11, 3), (gaveUp.SectorsFound, gaveUp.SectorsTotal, gaveUp.Retries));
+
+        var recovered = tracks[(58, 1)];
+        Assert.Equal(TrackStatus.RecoveredAfterRetry, recovered.Status);
+        Assert.Equal(1, recovered.Retries);
+
+        Assert.Equal(TrackStatus.DecodedOk, tracks[(40, 0)].Status);
+    }
+
+    [Fact]
+    public void Raw_capture_with_format_reports_decode_but_stays_raw()
+    {
+        var t = Replay("amiga-worn", "read-raw-format");
+        Assert.Equal(new SectorSummary(1723, 1760), t.Summary);
+        var (status, detail) = Application.Jobs.JobRunner.EvaluateRead(Exit0, t, CaptureMode.Preservation, Amiga, outputExists: true);
+        Assert.Equal(Application.Jobs.JobStatus.Partial, status);
+        Assert.StartsWith("Raw flux captured.", detail);
+    }
+
+    [Fact]
+    public void Pure_raw_capture_covers_82_cylinders_with_no_decode_claims()
+    {
+        var t = Replay("amiga-worn", "read-raw");
+        Assert.Equal(164, t.Tracks.Count);
+        Assert.All(t.Tracks, x => Assert.Equal(TrackStatus.FluxCapturedDecodeUnknown, x.Status));
+        var (status, _) = Application.Jobs.JobRunner.EvaluateRead(Exit0, t, CaptureMode.Preservation, null, outputExists: true);
+        Assert.Equal(Application.Jobs.JobStatus.CompletedUnverified, status);
+    }
+
+    [Fact]
+    public void Known_good_disk_is_a_full_success()
+    {
+        var t = Replay("amiga-known-good", "read-raw-format");
+        Assert.Equal(new SectorSummary(1760, 1760), t.Summary);
+        Assert.Equal(160, t.Tracks.Count);
+        Assert.All(t.Tracks, x => Assert.Equal(TrackStatus.DecodedOk, x.Status));
+        var (status, detail) = Application.Jobs.JobRunner.EvaluateRead(Exit0, t, CaptureMode.Preservation, Amiga, outputExists: true);
+        Assert.Equal(Application.Jobs.JobStatus.Succeeded, status);
+        Assert.Equal("Raw flux captured. All 1,760 sectors decoded.", detail);
+    }
+
+    [Fact]
+    public void Command_failed_with_exit_code_zero_is_a_failure()
+    {
+        var t = Replay("wrong-drive", "read-raw");
+        Assert.Equal("Command Failed: Seek: Track 0 not found", t.FatalError);
+        var (status, detail) = Application.Jobs.JobRunner.EvaluateRead(Exit0, t, CaptureMode.Preservation, null, outputExists: false);
+        Assert.Equal(Application.Jobs.JobStatus.Failed, status);
+        Assert.Contains("straight cable usually means B", detail);
+
+        var (writeStatus, _) = Application.Jobs.JobRunner.EvaluateWrite(Exit0, new WriteRequest(@"C:\a.adf", Amiga, new DeviceTarget()), t);
+        Assert.Equal(Application.Jobs.JobStatus.Failed, writeStatus);
+    }
+}

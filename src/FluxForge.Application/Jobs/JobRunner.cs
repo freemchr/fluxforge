@@ -125,7 +125,7 @@ public sealed class JobRunner(IProcessRunner runner, IJobStore store, TimeProvid
         var tracker = new TrackProgressTracker();
         var result = await RunTrackedAsync(job.Tools, args, tracker, progress, ct).ConfigureAwait(false);
         tracker.Finish();
-        var (status, detail) = EvaluateWrite(result, req);
+        var (status, detail) = EvaluateWrite(result, req, tracker);
         return await FinishAsync(record, result, status, detail, tracker, [source], progress).ConfigureAwait(false);
     }
 
@@ -178,6 +178,8 @@ public sealed class JobRunner(IProcessRunner runner, IJobStore store, TimeProvid
             return (JobStatus.Failed, "The read timed out and was stopped. Captured data is incomplete.");
         if (result.ExitCode != 0)
             return (JobStatus.Failed, $"gw exited with code {result.ExitCode}. {LastError(result)}".Trim());
+        if (tracker.FatalError is { } fatal)
+            return (JobStatus.Failed, $"gw reported: {fatal}{Hint(fatal)}");
         if (!outputExists)
             return (JobStatus.Failed, "gw reported success but no image file was produced.");
 
@@ -200,12 +202,14 @@ public sealed class JobRunner(IProcessRunner runner, IJobStore store, TimeProvid
         return (JobStatus.CompletedUnverified, prefix + "gw finished without errors, but FluxForge could not confirm sector statistics from its output.");
     }
 
-    public static (JobStatus Status, string Detail) EvaluateWrite(ProcessResult result, WriteRequest request)
+    public static (JobStatus Status, string Detail) EvaluateWrite(ProcessResult result, WriteRequest request, TrackProgressTracker? tracker = null)
     {
         if (result.Cancelled || result.TimedOut)
             return (JobStatus.Interrupted, "The write was interrupted. The floppy's contents are now in an unknown state.");
         if (result.ExitCode != 0)
             return (JobStatus.Failed, $"Write failed: gw exited with code {result.ExitCode}. {LastError(result)}".Trim());
+        if (tracker?.FatalError is { } fatal)
+            return (JobStatus.Failed, $"Write failed — gw reported: {fatal}{Hint(fatal)} The disk may be partly written.");
         var raw = GwCommands.RawFluxExtensions.Contains(Path.GetExtension(request.ImagePath));
         if (!request.Verify)
             return (JobStatus.CompletedUnverified, "Write finished. Verification was turned off, so the disk was not checked.");
@@ -215,6 +219,14 @@ public sealed class JobRunner(IProcessRunner runner, IJobStore store, TimeProvid
     }
 
     // gw writes all of its output (progress included) to stderr, so stream alone doesn't mark an error.
+    /// <summary>Plain-language hints for the common hardware errors seen on real boards.</summary>
+    private static string Hint(string error) =>
+        error.Contains("Track 0 not found", StringComparison.OrdinalIgnoreCase) || error.Contains("No Index", StringComparison.OrdinalIgnoreCase)
+            ? " The drive did not respond: check the drive selection (A/B for PC cables — a straight cable usually means B), drive power, and that a disk is inserted."
+            : error.Contains("write protect", StringComparison.OrdinalIgnoreCase)
+                ? " The disk is write-protected."
+                : "";
+
     private static string LastError(ProcessResult result) =>
         result.Lines.LastOrDefault(l => l.Text.Contains("ERROR", StringComparison.OrdinalIgnoreCase))?.Text.Trim().TrimStart('*', ' ')
         ?? result.Lines.LastOrDefault(l => l.Text.Trim().Length > 0)?.Text.Trim()

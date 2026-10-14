@@ -13,7 +13,7 @@
 #>
 param(
     [Parameter(Mandatory)] [string] $Gw,
-    [Parameter(Mandatory)] [ValidateSet('no-device', 'no-disk', 'amiga-good', 'amiga-bad', 'atarist-good', 'pc-good', 'c64-good', 'help-only')] [string] $Scenario,
+    [Parameter(Mandatory)] [ValidateSet('no-device', 'no-disk', 'amiga-good', 'amiga-worn', 'amiga-bad', 'atarist-good', 'pc-good', 'c64-good', 'help-only')] [string] $Scenario,
     [string] $Format,
     [string] $Drive = 'A',
     [string] $OutRoot = (Join-Path $PSScriptRoot '..\..\fixtures')

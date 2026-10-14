@@ -48,4 +48,16 @@ public sealed partial class HomeViewModel : ObservableObject, IPageLifecycle
 
     [RelayCommand]
     private void Go(string page) => _navigator.Navigate(page);
+
+    [RelayCommand]
+    private async Task ReviewUpdateAsync()
+    {
+        if (State.LatestRelease is { } release) await Setup.ReviewAndInstallAsync(release);
+    }
+
+    [RelayCommand]
+    private void DismissUpdate() => State.UpdateDismissed = true;
+
+    [RelayCommand]
+    private void SkipUpdate() => State.SkipLatestRelease();
 }

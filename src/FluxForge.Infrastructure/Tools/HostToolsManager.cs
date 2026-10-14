@@ -57,6 +57,37 @@ public sealed class HostToolsManager(
 
     public Task<ReleaseInfo> GetLatestReleaseAsync(CancellationToken ct) => releases.GetLatestAsync(ct);
 
+    public Task<IReadOnlyList<ReleaseInfo>> GetReleasesAsync(CancellationToken ct) => releases.GetReleasesAsync(ct);
+
+    public async Task<HostToolsStatus> ActivateAsync(string version, CancellationToken ct)
+    {
+        GuardIdle();
+        var s = settings.Load();
+        if (s.ActiveManagedVersion == version && string.IsNullOrEmpty(s.CustomGwPath))
+            return await DiscoverAsync(ct).ConfigureAwait(false);
+        var exe = ManagedExecutable(version) ?? throw new ToolsInstallException($"Host tools {version} are not installed.");
+        var probe = await ProbeAsync(exe, HostToolsSource.Managed, ct).ConfigureAwait(false)
+                    ?? throw new ToolsInstallException($"Host tools {version} failed their self-test.");
+        // Choosing a managed version also stops using a custom gw.exe (the custom file itself is untouched).
+        settings.Save(s with { ActiveManagedVersion = version, PreviousManagedVersion = s.ActiveManagedVersion ?? s.PreviousManagedVersion, CustomGwPath = null });
+        return Found(probe, $"Now using host tools {version}.");
+    }
+
+    public void Remove(string version)
+    {
+        GuardIdle();
+        var s = settings.Load();
+        if (s.ActiveManagedVersion == version)
+            throw new ToolsInstallException("The active version can't be removed. Switch to another version first.");
+        var dir = Path.GetFullPath(Path.Combine(paths.ToolsRoot, version));
+        if (!dir.StartsWith(Path.GetFullPath(paths.ToolsRoot) + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase) ||
+            !File.Exists(Path.Combine(dir, ManifestFile)))
+            throw new ToolsInstallException($"Host tools {version} are not a FluxForge-managed installation.");
+        Directory.Delete(dir, recursive: true);
+        if (s.PreviousManagedVersion == version)
+            settings.Save(s with { PreviousManagedVersion = null });
+    }
+
     public async Task<HostToolsStatus> InstallAsync(ReleaseInfo release, IProgress<InstallProgress>? progress, CancellationToken ct)
     {
         var asset = release.WindowsAsset

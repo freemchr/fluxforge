@@ -11,8 +11,8 @@
              d:DataContext="{d:DesignInstance vm:HomeViewModel}">
     <ScrollViewer VerticalScrollBarVisibility="Auto">
         <StackPanel Margin="20,14,20,20" MaxWidth="1000" HorizontalAlignment="Left">
-            <TextBlock Text="Welcome to FluxForge" Style="{StaticResource FfPageTitle}" />
-            <TextBlock Text="Back up, write and document floppy disks with your Greaseweazle — preservation first." Style="{StaticResource FfSubtitle}" Margin="0,0,0,12" />
+            <Image Source="{StaticResource FfLogo}" Height="110" HorizontalAlignment="Left" Margin="0,0,0,14"
+                   RenderOptions.BitmapScalingMode="HighQuality" AutomationProperties.Name="FluxForge — Preserve the past one disk at a time" />
 
             <!-- First-run: host tools missing -->
             <Border Style="{StaticResource FfCard}" BorderBrush="{StaticResource FfAccentBrush}"
@@ -22,6 +22,27 @@
                     <TextBlock Text="{Binding State.ToolsStatus.Message}" Style="{StaticResource FfBody}" Margin="0,0,0,12" />
                     <v:ToolsSetupView DataContext="{Binding Setup}" />
                 </StackPanel>
+            </Border>
+
+            <!-- Update available: always ask, never install silently -->
+            <Border Style="{StaticResource FfCard}" BorderBrush="{StaticResource FfInfoBrush}"
+                    Visibility="{Binding State.ShowUpdatePrompt, Converter={StaticResource VisibleWhen}}">
+                <DockPanel>
+                    <ui:SymbolIcon DockPanel.Dock="Left" Symbol="ArrowCircleUp24" FontSize="28" Foreground="{StaticResource FfInfoBrush}" Margin="0,0,12,0" VerticalAlignment="Top" />
+                    <StackPanel>
+                        <TextBlock Style="{StaticResource FfSectionHeader}" Margin="0,0,0,2"
+                                   Text="{Binding State.LatestRelease.Version, StringFormat='Greaseweazle host tools {0} is available'}" />
+                        <TextBlock Text="{Binding State.VersionSummary}" Style="{StaticResource FfSubtitle}" />
+                        <TextBlock Style="{StaticResource FfSubtitle}" FontSize="11" Margin="0,2,0,8"
+                                   Text="Your current version stays installed. If you need a particular version, you can switch or install older ones in Settings." />
+                        <WrapPanel>
+                            <ui:Button Appearance="Primary" Content="Review update…" Command="{Binding ReviewUpdateCommand}" Margin="0,0,8,0" />
+                            <ui:Button Content="Not now" Command="{Binding DismissUpdateCommand}" Margin="0,0,8,0" />
+                            <ui:Button Appearance="Transparent" Content="Skip this version" Command="{Binding SkipUpdateCommand}" Margin="0,0,8,0" />
+                            <ui:Button Appearance="Transparent" Content="Manage versions" Command="{Binding GoCommand}" CommandParameter="settings" />
+                        </WrapPanel>
+                    </StackPanel>
+                </DockPanel>
             </Border>
 
             <UniformGrid Columns="2">
@@ -36,7 +57,7 @@
                         <TextBlock Text="{Binding State.ToolsStatus.Message}" Style="{StaticResource FfSubtitle}" Margin="0,4,0,0" />
                         <TextBlock Text="{Binding State.Tools.ExecutablePath}" Style="{StaticResource FfSubtitle}" FontSize="11" Margin="0,4,0,0"
                                    Foreground="{DynamicResource TextFillColorTertiaryBrush}" />
-                        <TextBlock Text="{Binding State.UpdateCheckMessage}" Style="{StaticResource FfSubtitle}" FontSize="11" Margin="0,4,0,0" />
+                        <TextBlock Text="{Binding State.VersionSummary}" Style="{StaticResource FfSubtitle}" FontSize="12" Margin="0,4,0,0" />
                     </StackPanel>
                 </Border>
                 <Border Style="{StaticResource FfCard}" Margin="6,0,0,12">

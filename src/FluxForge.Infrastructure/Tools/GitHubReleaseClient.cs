@@ -12,6 +12,7 @@ public sealed class GitHubReleaseClient(HttpClient http)
 {
     public const string Repository = "keirf/greaseweazle";
     public static readonly Uri LatestReleaseApi = new($"https://api.github.com/repos/{Repository}/releases/latest");
+    public static readonly Uri ReleasesApi = new($"https://api.github.com/repos/{Repository}/releases?per_page=50");
     public const long MaxDownloadBytes = 150L * 1024 * 1024;
 
     private static readonly HashSet<string> AllowedHosts = new(StringComparer.OrdinalIgnoreCase)
@@ -19,9 +20,15 @@ public sealed class GitHubReleaseClient(HttpClient http)
         "api.github.com", "github.com", "objects.githubusercontent.com", "release-assets.githubusercontent.com",
     };
 
-    public async Task<ReleaseInfo> GetLatestAsync(CancellationToken ct)
+    public async Task<ReleaseInfo> GetLatestAsync(CancellationToken ct) => ParseRelease(await GetJsonAsync(LatestReleaseApi, ct).ConfigureAwait(false));
+
+    /// <summary>Stable releases, newest first, so users can install an older version they depend on.</summary>
+    public async Task<IReadOnlyList<ReleaseInfo>> GetReleasesAsync(CancellationToken ct) =>
+        ParseReleaseList(await GetJsonAsync(ReleasesApi, ct).ConfigureAwait(false));
+
+    private async Task<string> GetJsonAsync(Uri uri, CancellationToken ct)
     {
-        using var request = new HttpRequestMessage(HttpMethod.Get, LatestReleaseApi);
+        using var request = new HttpRequestMessage(HttpMethod.Get, uri);
         request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/vnd.github+json"));
         HttpResponseMessage response;
         try { response = await http.SendAsync(request, ct).ConfigureAwait(false); }
@@ -34,17 +41,35 @@ public sealed class GitHubReleaseClient(HttpClient http)
                 throw new ToolsInstallException("GitHub's API rate limit was reached. Try again in an hour, or import a downloaded ZIP.");
             if (!response.IsSuccessStatusCode)
                 throw new ToolsInstallException($"GitHub returned {(int)response.StatusCode} {response.ReasonPhrase}.");
-            var json = await response.Content.ReadAsStringAsync(ct).ConfigureAwait(false);
-            return ParseRelease(json);
+            return await response.Content.ReadAsStringAsync(ct).ConfigureAwait(false);
         }
     }
 
     public static ReleaseInfo ParseRelease(string json)
     {
         using var doc = JsonDocument.Parse(json);
-        var r = doc.RootElement;
-        if (r.GetProperty("draft").GetBoolean() || r.GetProperty("prerelease").GetBoolean())
+        if (IsUnstable(doc.RootElement))
             throw new ToolsInstallException("The latest release is not a stable release.");
+        return ParseRelease(doc.RootElement);
+    }
+
+    public static IReadOnlyList<ReleaseInfo> ParseReleaseList(string json)
+    {
+        using var doc = JsonDocument.Parse(json);
+        var releases = new List<ReleaseInfo>();
+        foreach (var r in doc.RootElement.EnumerateArray())
+        {
+            if (IsUnstable(r)) continue;
+            try { releases.Add(ParseRelease(r)); }
+            catch (ToolsInstallException) { } // unrecognised tag: not a host-tools release
+        }
+        return [.. releases.OrderByDescending(r => r.Version)];
+    }
+
+    private static bool IsUnstable(JsonElement r) => r.GetProperty("draft").GetBoolean() || r.GetProperty("prerelease").GetBoolean();
+
+    private static ReleaseInfo ParseRelease(JsonElement r)
+    {
         var tag = r.GetProperty("tag_name").GetString() ?? "";
         if (!GwVersion.TryParse(tag, out var version))
             throw new ToolsInstallException($"Unrecognised release tag '{tag}'.");

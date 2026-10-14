@@ -79,11 +79,24 @@ public sealed class TrackProgressTracker
     public SectorSummary? Summary { get; private set; }
     public int UnparsedLines { get; private set; }
 
+    /// <summary>
+    /// First fatal message from gw. gw 1.23 can print <c>Command Failed: ...</c> and still exit 0,
+    /// so callers must treat this as failure regardless of the exit code.
+    /// </summary>
+    public string? FatalError { get; private set; }
+
     /// <summary>Feed one output line; returns the affected track, if any.</summary>
     public TrackObservation? Feed(string line)
     {
         line = line.Trim();
         if (line.Length == 0) return null;
+
+        if (FatalError is null && (line.StartsWith("Command Failed:", StringComparison.Ordinal) ||
+                                   line.StartsWith("** FATAL ERROR", StringComparison.Ordinal)))
+        {
+            FatalError = line.TrimStart('*', ' ');
+            return null;
+        }
 
         var summary = GwOutputParser.Summary().Match(line);
         if (summary.Success)
@@ -117,6 +130,11 @@ public sealed class TrackProgressTracker
                 ? (retries > 0 ? TrackStatus.RecoveredAfterRetry : TrackStatus.DecodedOk)
                 : TrackStatus.Unreadable;
             next = new TrackObservation(key.Item1, key.Item2, status, found, total, retries, ParseConfidence.High, log);
+        }
+        else if (rest.StartsWith("Giving up", StringComparison.OrdinalIgnoreCase))
+        {
+            // gw 1.23: "T0.0: Giving up: 1 sectors missing" after the last retry.
+            next = (prev ?? Empty(key)) with { Status = TrackStatus.Unreadable, LogLines = log, Confidence = ParseConfidence.High };
         }
         else if (rest.Contains("Retry", StringComparison.OrdinalIgnoreCase))
         {

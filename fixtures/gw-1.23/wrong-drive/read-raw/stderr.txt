@@ -1,0 +1,2 @@
+Reading c=0-81:h=0-1 revs=3
+Command Failed: Seek: Track 0 not found
