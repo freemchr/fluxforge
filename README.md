@@ -1,31 +1,31 @@
-<p align="center"><img src="assets/brand/fluxforge-logo.png" alt="FluxForge — Greaseweazle floppy disk imaging and preservation app for Windows" width="720"></p>
+<p align="center"><img src="assets/brand/fluxforge-logo.png" alt="FluxForge: Greaseweazle floppy disk imaging and preservation app for Windows" width="720"></p>
 
 <p align="center"><a href="https://buymeacoffee.com/cjf077"><img src="https://img.shields.io/badge/Buy%20me%20a%20coffee-support%20FluxForge-FFDD00?logo=buymeacoffee&amp;logoColor=black" alt="Buy me a coffee"></a></p>
 
-# FluxForge — Greaseweazle GUI for Windows: floppy disk imaging, flux preservation and recovery
+# FluxForge: Greaseweazle GUI for Windows for floppy disk imaging, flux preservation and recovery
 
 **FluxForge is a free Windows desktop app for backing up, preserving and writing floppy disks with a
 [Greaseweazle](https://github.com/keirf/greaseweazle) USB floppy controller.** Read Amiga, Atari ST,
 IBM PC and Commodore 64 disks to ADF, ST, IMG and D64 images, capture genuine raw flux to SCP for
-long-term preservation, and write images back to real floppies — without ever opening a terminal.
+long-term preservation, and write images back to real floppies, all without opening a terminal.
 
 FluxForge is a modern graphical front end for the official Greaseweazle host tools (`gw.exe`). It
 installs and updates those tools for you, detects your board, shows a live track map while it works,
 and tells you the truth about every disk: what was recovered, what wasn't, and why.
 
 > FluxForge is an independent project and is not affiliated with the Greaseweazle project.
-> Status: **preview** — tested on a Greaseweazle V4.1 with a 3.5" PC floppy drive.
+> Status: **preview**, tested on a Greaseweazle V4.1 with a 3.5" PC floppy drive.
 
 ## Why FluxForge?
 
-- **No command line.** One-click, user-approved install of the official Greaseweazle host tools —
-  no Python, no PATH editing, no administrator rights.
+- **No command line.** One-click, user-approved install of the official Greaseweazle host tools,
+  with no Python, no PATH editing and no administrator rights.
 - **Preservation first.** Raw flux captures always use `--raw`, so the SCP file holds what the disk
   actually contains, not a "cleaned up" regeneration.
 - **Honest results.** A read is only marked *Succeeded* when every sector is proven decoded. Worn
   disks show as *Partial* with exactly which tracks failed; a write only counts once it is verified.
-- **Catches the wrong format.** If a disk holds sectors your chosen format doesn't define — such as
-  an Atari ST 800K (10-sector) disk read as 720K — FluxForge says so and suggests the right format,
+- **Catches the wrong format.** If a disk holds sectors your chosen format doesn't define (such as
+  an Atari ST 800K, 10-sector disk read as 720K), FluxForge says so and suggests the right format,
   instead of silently dropping data.
 - **Recover without touching the disk again.** Decode any saved raw capture into a sector image with
   a different format in Image Studio. Fragile disks only need to be read once.
@@ -82,18 +82,18 @@ planned. Copy-protected disks should be captured as raw flux (`.scp`).
 
 - Windows 10 (22H2) or Windows 11, 64-bit
 - A [Greaseweazle](https://github.com/keirf/greaseweazle/wiki) board (V4/V4.1 tested) and a floppy
-  drive — a standard 3.5" PC drive reads Amiga and Atari ST DD disks
+  drive. A standard 3.5" PC drive reads Amiga and Atari ST DD disks
 - The Greaseweazle host tools, which FluxForge installs for you
 
 ## Download and install
 
 1. Download **FluxForge.Desktop-win-Setup.exe** from the [latest release](https://github.com/freemchr/fluxforge/releases/latest).
-2. Run it. FluxForge installs just for your Windows user — no administrator rights needed — and adds
+2. Run it. FluxForge installs just for your Windows user (no administrator rights needed) and adds
    a Start menu shortcut. Prefer not to install? Use the **Portable** zip from the same page.
 3. FluxForge keeps itself up to date: Settings → About → **Check for FluxForge updates**.
 
-> Windows may show a SmartScreen warning for new releases while the app builds its reputation —
-> choose **More info → Run anyway**. Uninstalling FluxForge keeps your disk images, settings and history.
+> Windows may show a SmartScreen warning for new releases while the app builds its reputation.
+> Choose **More info → Run anyway**. Uninstalling FluxForge keeps your disk images, settings and history.
 
 ## Getting started
 
@@ -126,6 +126,7 @@ and the project layout.
 
 ## Support
 
-Found a bug or have an idea? [Open an issue](https://github.com/freemchr/fluxforge/issues).
+Found a bug or have an idea? [Open an issue](https://github.com/freemchr/fluxforge/issues/new/choose).
+Tried FluxForge with your own Greaseweazle? A quick [hardware test report](https://github.com/freemchr/fluxforge/issues/new?template=hardware_test_report.yml) helps a lot, even if everything worked.
 When reporting a problem, attach the job report from **Activity → Export report**.
 If FluxForge saved one of your disks, you can [buy me a coffee](https://buymeacoffee.com/cjf077) ☕
