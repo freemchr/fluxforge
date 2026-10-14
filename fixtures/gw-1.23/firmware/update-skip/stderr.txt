@@ -1,0 +1,5 @@
+Downloading latest firmware: greaseweazle-firmware-1.6.upd
+Updating Main Firmware to version 1.6...
+** SKIPPING UPDATE:
+Device is already running version 1.6.
+Use --force to update anyway.

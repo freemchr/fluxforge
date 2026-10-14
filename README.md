@@ -108,9 +108,15 @@ Every feature below has its own screenshot, all taken from real runs on a Grease
 - **USB bandwidth test** between the PC and the Greaseweazle.
 - Seek the heads to any cylinder, reset the board, and view the drive timing settings.
 - **Head cleaning** with a cleaning disk, and **disk erase**, both behind clear confirmations.
+- **Firmware assistant:** shows the board's firmware next to the latest official release and updates
+  it with `gw update`, pinned to the version you were shown. It needs a typed confirmation, can't be
+  interrupted once started, confirms the new version with the board afterwards, and links the
+  official recovery guide. The bootloader is never touched.
 - Every tool run is recorded in Activity.
 
 <p align="center"><img src="docs/screenshots/drive-tools.png" alt="FluxForge Drive Tools: drive speed 299.76 RPM, USB bandwidth test and head controls" width="820"></p>
+
+<p align="center"><img src="docs/screenshots/firmware.png" alt="FluxForge firmware assistant: Greaseweazle V4.1 on firmware 1.6, up to date with the latest official release" width="820"></p>
 
 ### Device and diagnostics
 - Shows host tools, device and firmware as separate statuses (for example "Greaseweazle V4.1 on COM6,

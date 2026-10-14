@@ -44,6 +44,7 @@ public partial class App
             http.DefaultRequestHeaders.UserAgent.ParseAdd($"FluxForge/{typeof(App).Assembly.GetName().Version}");
             return new GitHubReleaseClient(http);
         });
+        services.AddSingleton<FluxForge.Application.Firmware.IFirmwareReleaseSource>(sp => sp.GetRequiredService<GitHubReleaseClient>());
         services.AddSingleton<IHostToolsManager, HostToolsManager>(sp => new HostToolsManager(
             sp.GetRequiredService<IProcessRunner>(), sp.GetRequiredService<ISettingsStore>(), paths,
             sp.GetRequiredService<GitHubReleaseClient>(), sp.GetRequiredService<IJobActivity>()));

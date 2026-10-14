@@ -4,7 +4,7 @@ using FluxForge.Application.Verify;
 
 namespace FluxForge.Application.Jobs;
 
-public enum JobKind { Read, Write, Convert, DriveTool, Verify }
+public enum JobKind { Read, Write, Convert, DriveTool, Verify, FirmwareUpdate }
 
 public enum JobStatus
 {

@@ -1,6 +1,6 @@
 # Next steps (handoff)
 
-Status as of 14 Oct 2026 (Verify and Library finished). Read this first when resuming work.
+Status as of 14 Oct 2026 (Verify, Library and Firmware assistant finished; v1.0.0). Read this first when resuming work.
 
 ## Agreed direction
 
@@ -17,19 +17,19 @@ disk and a disposable disk), and **Verify** (CF0 disk vs its backup image: all 1
 vs an altered copy: exactly the 3 changed sectors flagged; vs the raw `.scp` capture: decoded, all
 match), and **Library** (SQLite catalogue in `Data\library.db`; auto-adds reads/decodes via
 `CataloguingJobStore`, imports Activity history once, edit/search/tags/condition, integrity check,
-verify results recorded per image; tested in the app with real history and a real verify).
+verify results recorded per image; tested in the app with real history and a real verify), and the
+**Firmware assistant** (Drive Tools card: compares `gw info` with the latest keirf/greaseweazle-firmware
+release, `gw update --tag=vX.Y` behind a typed UPDATE confirmation, never cancellable, confirmed with
+`gw info` afterwards, no `--bootloader`/`--force`). The real board is already on the latest firmware
+(1.6), so only the documented skip path ran on hardware (fixture `firmware/update-skip`); the flash
+path was exercised against FakeGw (`FLUXFORGE_FAKEGW_FIRMWARE=1.5`). A real flash is still untested.
 
 ## To build next, in order
 
-1. **Firmware assistant** (new card on Drive Tools or its own page): show current firmware (`gw info`)
-   and what `gw update` would install. `gw update` with no options downloads the latest firmware from
-   GitHub itself (see `fixtures/gw-1.23/tools/update-help`). Require idle device, explicit typed
-   confirmation, power/cable warning, link to official recovery docs. **Never expose `--bootloader`.**
-   Ask the user before flashing their only board (V4.1, firmware 1.6; firmware 1.7 is mentioned upstream).
-2. Then: batch imaging, more formats (Apple II, Acorn, MSX, Amiga HD), PC/C64 real-disk tests, light
+1. Next: batch imaging, more formats (Apple II, Acorn, MSX, Amiga HD), PC/C64 real-disk tests, light
    theme visual pass, Activity export click-through, run `Setup.exe` and test self-update for real.
    Library ideas not built yet: move an image to another disk / merge disks, scans/photos of labels.
-3. Release: bump `<Version>` in `Directory.Build.props`, then tag `vX.Y.Z` (the release workflow
+2. Release: bump `<Version>` in `Directory.Build.props`, then tag `vX.Y.Z` (the release workflow
    builds, packages and publishes). Code signing is still to do.
 
 ## Conventions that matter

@@ -1,0 +1,5 @@
+{
+  "args": ["update", "--tag", "v1.6"],
+  "exitCode": 0,
+  "note": "Real V4.1 on firmware 1.6, so gw takes its documented skip path and writes nothing to flash. Captured via PowerShell; wrapper lines removed. Other outcomes ('Done.', '** UPDATE FAILED: Please retry!', 'Command Failed: ...') come from upstream update.py, not a capture."
+}

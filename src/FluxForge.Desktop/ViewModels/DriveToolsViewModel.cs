@@ -1,8 +1,10 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using FluxForge.Application.Firmware;
 using FluxForge.Application.Gw;
 using FluxForge.Application.Jobs;
 using FluxForge.Application.Settings;
+using FluxForge.Application.Tools;
 using FluxForge.Desktop.Services;
 
 namespace FluxForge.Desktop.ViewModels;
@@ -11,7 +13,7 @@ namespace FluxForge.Desktop.ViewModels;
 /// Drive and device utilities. Read-only checks (speed, USB, delays) run directly; anything that moves
 /// the heads over a cleaning disk or destroys data asks first. Every run is recorded under Activity.
 /// </summary>
-public sealed partial class DriveToolsViewModel(AppState state, JobRunner jobs, ISettingsStore settings, IDialogService dialogs)
+public sealed partial class DriveToolsViewModel(AppState state, JobRunner jobs, ISettingsStore settings, IDialogService dialogs, IFirmwareReleaseSource firmware)
     : ObservableObject, IPageLifecycle
 {
     private CancellationTokenSource? _cts;
@@ -29,6 +31,31 @@ public sealed partial class DriveToolsViewModel(AppState state, JobRunner jobs, 
     [ObservableProperty] public partial int CleanPasses { get; set; } = 3;
     [ObservableProperty] public partial bool EraseUnderstood { get; set; }
     [ObservableProperty] public partial string? LastOutcome { get; set; }
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(FirmwareAdvice), nameof(FirmwareStatus), nameof(FirmwareUpdateAvailable))]
+    public partial ReleaseInfo? LatestFirmware { get; set; }
+
+    [ObservableProperty] public partial bool IsCheckingFirmware { get; set; }
+    [ObservableProperty] public partial string FirmwareConfirmation { get; set; } = "";
+
+    /// <summary>True while a firmware flash runs: it must never be cancelled.</summary>
+    [ObservableProperty] public partial bool IsFlashing { get; set; }
+
+    public string InstalledFirmware => State.Device.Info is { DeviceFound: true } i
+        ? $"{i.Model}, firmware {i.Firmware ?? "unknown"}"
+        : "No Greaseweazle connected";
+
+    public FirmwareAdvice FirmwareAdvice => FirmwareAssistant.Advise(State.Device.Info?.Firmware, LatestFirmware);
+    public bool FirmwareUpdateAvailable => FirmwareAdvice == FirmwareAdvice.UpdateAvailable;
+
+    public string? FirmwareStatus => LatestFirmware is not { } latest ? null : FirmwareAdvice switch
+    {
+        FirmwareAdvice.UpToDate => $"Up to date: firmware {latest.Version} is the latest official release ({latest.PublishedAt.ToLocalTime():d MMM yyyy}).",
+        FirmwareAdvice.UpdateAvailable => $"Firmware {latest.Version} is available (released {latest.PublishedAt.ToLocalTime():d MMM yyyy}).",
+        FirmwareAdvice.NewerThanRelease => $"This board runs newer firmware than the latest stable release ({latest.Version}). Nothing to do.",
+        _ => $"The latest official firmware is {latest.Version}. Connect the Greaseweazle to compare.",
+    };
 
     public IReadOnlyList<int> PassChoices { get; } = [1, 2, 3, 5];
     public IReadOnlyList<DelayRow> DelayRows => [.. Delays.Select(d => new DelayRow(d.Name, d.Value))];
@@ -48,10 +75,18 @@ public sealed partial class DriveToolsViewModel(AppState state, JobRunner jobs, 
 
     private void OnStateChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e) => NotifyAll();
 
+    partial void OnFirmwareConfirmationChanged(string value) => UpdateFirmwareCommand.NotifyCanExecuteChanged();
+    partial void OnLatestFirmwareChanged(ReleaseInfo? value) => UpdateFirmwareCommand.NotifyCanExecuteChanged();
+    partial void OnIsFlashingChanged(bool value) => CancelCommand.NotifyCanExecuteChanged();
+
     private void NotifyAll()
     {
         OnPropertyChanged(nameof(BlockedReason));
-        foreach (var c in new IRelayCommand[] { MeasureRpmCommand, TestBandwidthCommand, ShowDelaysCommand, SeekCommand, ResetCommand, CleanCommand, EraseCommand, CancelCommand })
+        OnPropertyChanged(nameof(InstalledFirmware));
+        OnPropertyChanged(nameof(FirmwareAdvice));
+        OnPropertyChanged(nameof(FirmwareStatus));
+        OnPropertyChanged(nameof(FirmwareUpdateAvailable));
+        foreach (var c in new IRelayCommand[] { MeasureRpmCommand, TestBandwidthCommand, ShowDelaysCommand, SeekCommand, ResetCommand, CleanCommand, EraseCommand, CancelCommand, UpdateFirmwareCommand })
             c.NotifyCanExecuteChanged();
     }
 
@@ -115,7 +150,66 @@ public sealed partial class DriveToolsViewModel(AppState state, JobRunner jobs, 
         EraseUnderstood = false; // every erase needs a fresh acknowledgement
     }
 
-    private bool CanCancel => IsRunning;
+    /// <summary>Looks up what <c>gw update</c> would install. Only on request: FluxForge never checks firmware in the background.</summary>
+    [RelayCommand]
+    private async Task CheckFirmwareAsync()
+    {
+        IsCheckingFirmware = true;
+        try { LatestFirmware = await firmware.GetLatestFirmwareAsync(CancellationToken.None); }
+        catch (ToolsInstallException e) { LastOutcome = "Couldn't check for firmware: " + e.Message; }
+        finally { IsCheckingFirmware = false; }
+    }
+
+    private bool CanUpdateFirmware => CanRun && FirmwareUpdateAvailable && !State.IsJobRunning
+        && string.Equals(FirmwareConfirmation.Trim(), "UPDATE", StringComparison.Ordinal);
+
+    [RelayCommand(CanExecute = nameof(CanUpdateFirmware))]
+    private async Task UpdateFirmwareAsync()
+    {
+        if (State.Tools is not { } tools || LatestFirmware is not { } release || State.Device.Info is not { } device) return;
+        if (!await dialogs.ConfirmAsync($"Update the firmware to {release.Version}?",
+                $"{device.Model} on {device.Port} will be updated from firmware {device.Firmware} to {release.Version}.\n\n" +
+                "Keep the USB cable connected and the PC awake until it finishes (about a minute). Don't unplug the board or close FluxForge. " +
+                "If the update fails, the official firmware guide explains how to recover.",
+                "Update firmware")) return;
+
+        IsRunning = true;
+        IsFlashing = true;
+        LastOutcome = null;
+        var args = GwCommands.UpdateFirmware(release.Version, new DeviceTarget(settings.Load().DevicePort));
+        Console.Start(GwCommands.Preview(tools.ExecutablePath, args));
+        State.BeginJob();
+        try
+        {
+            var progress = new Progress<JobProgress>(p => { if (p.Line is { } line) Console.Append(line); });
+            var record = await Task.Run(() => jobs.RunFirmwareUpdateAsync(tools, release, new DeviceTarget(settings.Load().DevicePort), device, progress));
+            Console.Stop(record.Status);
+            LastOutcome = $"Firmware update: {StatusVisuals.For(record.Status).Label}. {record.StatusDetail}";
+        }
+        catch (DeviceBusyException e)
+        {
+            Console.Note("[FluxForge] " + e.Message);
+            Console.Stop(JobStatus.Failed);
+        }
+        finally
+        {
+            FirmwareConfirmation = ""; // every flash needs a fresh confirmation
+            IsFlashing = false;
+            IsRunning = false;
+            await State.EndJobAsync(); // re-detects the board, so the new version shows
+        }
+    }
+
+    [RelayCommand]
+    private static void OpenFirmwareGuide() => AppLinks.Open(FirmwareAssistant.RecoveryGuide);
+
+    [RelayCommand]
+    private void OpenFirmwareNotes()
+    {
+        if (LatestFirmware is { } r) AppLinks.Open(r.HtmlUrl.ToString());
+    }
+
+    private bool CanCancel => IsRunning && !IsFlashing;
 
     [RelayCommand(CanExecute = nameof(CanCancel))]
     private void Cancel() => _cts?.Cancel();

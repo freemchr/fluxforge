@@ -4,6 +4,7 @@
 //
 // Scenarios (env FLUXFORGE_FAKEGW_SCENARIO): ok (default) | nodevice | badtracks | fail
 // Speed (env FLUXFORGE_FAKEGW_DELAY_MS): per-track delay, default 25.
+// Firmware (env FLUXFORGE_FAKEGW_FIRMWARE): version the board reports until a simulated update, default 1.6.
 
 using System.Globalization;
 
@@ -29,6 +30,7 @@ switch (action)
     case "read": return Read();
     case "write": return Write();
     case "reset": Console.WriteLine($"{Marker} reset"); return 0;
+    case "update": return Update();
     default:
         Console.Error.WriteLine($"** FATAL ERROR: Unknown action '{action}'");
         return 1;
@@ -47,9 +49,35 @@ int Info()
     Console.WriteLine("  Port:     COM7");
     Console.WriteLine("  Model:    Greaseweazle V4.1 (simulated)");
     Console.WriteLine("  MCU:      AT32F403A, 240MHz, 224kB SRAM");
-    Console.WriteLine("  Firmware: 1.6");
+    Console.WriteLine($"  Firmware: {Firmware()}");
     Console.WriteLine("  Serial:   FAKE0000000001");
     Console.WriteLine("  USB:      Full Speed (12 Mbit/s), 128kB Buffer");
+    return 0;
+}
+
+// The simulated board remembers a flashed version in a temp file, as a real board keeps it in flash.
+string FirmwareStateFile() => Path.Combine(Path.GetTempPath(), "fluxforge-fakegw-firmware.txt");
+
+string Firmware() => File.Exists(FirmwareStateFile()) ? File.ReadAllText(FirmwareStateFile()).Trim()
+    : Environment.GetEnvironmentVariable("FLUXFORGE_FAKEGW_FIRMWARE") ?? "1.6";
+
+// Mirrors gw 1.23 tools/update.py output: download, "Updating Main Firmware to version X.Y...", then "Done." or a skip.
+int Update()
+{
+    var version = options.TryGetValue("--tag", out var tag) ? tag.TrimStart('v') : "1.6";
+    Console.Error.WriteLine($"Downloading latest firmware: greaseweazle-firmware-{version}.upd   [{Marker}]");
+    Console.Error.WriteLine($"Updating Main Firmware to version {version}...");
+    if (string.CompareOrdinal(Firmware(), version) >= 0)
+    {
+        Console.Error.WriteLine("** SKIPPING UPDATE:");
+        Console.Error.WriteLine($"Device is already running version {Firmware()}.");
+        Console.Error.WriteLine("Use --force to update anyway.");
+        return 0;
+    }
+    Thread.Sleep(delay * 40);
+    if (scenario == "fail") { Console.Error.WriteLine("** UPDATE FAILED: Please retry!"); return 0; }
+    File.WriteAllText(FirmwareStateFile(), version);
+    Console.Error.WriteLine("Done.");
     return 0;
 }
 

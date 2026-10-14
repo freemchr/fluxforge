@@ -2,14 +2,20 @@ using System.Net;
 using System.Net.Http.Headers;
 using System.Security.Cryptography;
 using System.Text.Json;
+using FluxForge.Application.Firmware;
 using FluxForge.Application.Gw;
 using FluxForge.Application.Tools;
 
 namespace FluxForge.Infrastructure.Tools;
 
-/// <summary>Reads official stable releases from github.com/keirf/greaseweazle over an HTTPS host allowlist.</summary>
-public sealed class GitHubReleaseClient(HttpClient http)
+/// <summary>
+/// Reads official stable releases from github.com/keirf/greaseweazle (host tools) and
+/// keirf/greaseweazle-firmware (what <c>gw update</c> installs) over an HTTPS host allowlist.
+/// </summary>
+public sealed class GitHubReleaseClient(HttpClient http) : IFirmwareReleaseSource
 {
+    public static readonly Uri LatestFirmwareApi = new("https://api.github.com/repos/keirf/greaseweazle-firmware/releases/latest");
+
     public const string Repository = "keirf/greaseweazle";
     public static readonly Uri LatestReleaseApi = new($"https://api.github.com/repos/{Repository}/releases/latest");
     public static readonly Uri ReleasesApi = new($"https://api.github.com/repos/{Repository}/releases?per_page=50");
@@ -21,6 +27,9 @@ public sealed class GitHubReleaseClient(HttpClient http)
     };
 
     public async Task<ReleaseInfo> GetLatestAsync(CancellationToken ct) => ParseRelease(await GetJsonAsync(LatestReleaseApi, ct).ConfigureAwait(false));
+
+    /// <summary>The same "latest" release gw update downloads when given no tag.</summary>
+    public async Task<ReleaseInfo> GetLatestFirmwareAsync(CancellationToken ct) => ParseRelease(await GetJsonAsync(LatestFirmwareApi, ct).ConfigureAwait(false));
 
     /// <summary>Stable releases, newest first, so users can install an older version they depend on.</summary>
     public async Task<IReadOnlyList<ReleaseInfo>> GetReleasesAsync(CancellationToken ct) =>

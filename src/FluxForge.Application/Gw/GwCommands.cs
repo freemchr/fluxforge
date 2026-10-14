@@ -107,6 +107,19 @@ public static class GwCommands
         return args;
     }
 
+    /// <summary>
+    /// Main-firmware update pinned to the release the user was shown (<c>--tag</c>), so a release
+    /// published in the meantime is never flashed by surprise. FluxForge never passes <c>--bootloader</c>
+    /// (a failed bootloader flash needs a hardware programmer) or <c>--force</c> (downgrades).
+    /// </summary>
+    public static IReadOnlyList<string> UpdateFirmware(GwVersion version, DeviceTarget? target = null)
+    {
+        var args = new List<string> { "update", $"--tag=v{version.Major}.{version.Minor}" };
+        if (!string.IsNullOrWhiteSpace(target?.Port))
+            args.Add("--device=" + RequireToken(target.Port));
+        return args;
+    }
+
     /// <summary>Human-readable preview for the "command preview" panel. Never executed.</summary>
     public static string Preview(string exe, IReadOnlyList<string> args) =>
         string.Join(' ', new[] { Quote(Path.GetFileName(exe)) }.Concat(args.Select(Quote)));

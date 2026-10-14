@@ -130,6 +130,43 @@
                         <ui:Button Appearance="Danger" Content="Erase disk…" Icon="{ui:SymbolIcon Delete24}" Command="{Binding EraseCommand}" />
                     </StackPanel>
                 </Border>
+
+                <!-- Firmware: look up first, flash only with a typed confirmation. Never the bootloader. -->
+                <Border Style="{StaticResource FfCard}">
+                    <StackPanel>
+                        <DockPanel>
+                            <ui:Button DockPanel.Dock="Right" Content="Check for updates" Icon="{ui:SymbolIcon ArrowSync24}" Command="{Binding CheckFirmwareCommand}"
+                                       IsEnabled="{Binding IsCheckingFirmware, Converter={StaticResource Not}}" />
+                            <StackPanel>
+                                <TextBlock Text="Greaseweazle firmware" Style="{StaticResource FfSectionHeader}" Margin="0,0,0,2" />
+                                <TextBlock Text="Checks GitHub for the latest official firmware. Nothing is installed unless you confirm below." Style="{StaticResource FfSubtitle}" />
+                            </StackPanel>
+                        </DockPanel>
+                        <TextBlock Style="{StaticResource FfBody}" Margin="0,10,0,0">
+                            <Run Text="Installed:" FontWeight="SemiBold" /> <Run Text="{Binding InstalledFirmware, Mode=OneWay}" />
+                        </TextBlock>
+                        <TextBlock Text="{Binding FirmwareStatus}" Style="{StaticResource FfBody}" Margin="0,4,0,0"
+                                   Visibility="{Binding FirmwareStatus, Converter={StaticResource VisibleWhen}}" />
+                        <WrapPanel Margin="0,6,0,0" Visibility="{Binding LatestFirmware, Converter={StaticResource VisibleWhen}}">
+                            <ui:Button Content="Release notes" Icon="{ui:SymbolIcon Open24}" Appearance="Transparent" Command="{Binding OpenFirmwareNotesCommand}" Margin="0,0,6,0" />
+                            <ui:Button Content="Firmware and recovery guide" Icon="{ui:SymbolIcon Open24}" Appearance="Transparent" Command="{Binding OpenFirmwareGuideCommand}" />
+                        </WrapPanel>
+
+                        <Border Margin="0,10,0,0" Padding="12" CornerRadius="6" BorderThickness="1" BorderBrush="{StaticResource FfWarningBrush}"
+                                Visibility="{Binding FirmwareUpdateAvailable, Converter={StaticResource VisibleWhen}}">
+                            <StackPanel>
+                                <TextBlock Text="Before you update" FontWeight="SemiBold" Style="{StaticResource FfBody}" />
+                                <TextBlock Style="{StaticResource FfBody}" TextWrapping="Wrap" Margin="0,4,0,0"
+                                           Text="Use a reliable USB port and cable, keep the PC awake (plug a laptop into mains power), and don't unplug the board until FluxForge says the update has finished. It takes about a minute and can't be stopped once started. If it fails, retry straight away; the firmware guide explains recovery." />
+                                <TextBlock Text="Type UPDATE to confirm" Style="{StaticResource FfLabel}" />
+                                <ui:TextBox Text="{Binding FirmwareConfirmation, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="UPDATE" Width="200"
+                                            HorizontalAlignment="Left" AutomationProperties.Name="Type UPDATE to confirm" />
+                                <ui:Button Appearance="Caution" Content="Update firmware…" Icon="{ui:SymbolIcon ArrowUpload24}" Margin="0,10,0,0"
+                                           Command="{Binding UpdateFirmwareCommand}" />
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </Border>
             </StackPanel>
         </ScrollViewer>
 

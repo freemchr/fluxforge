@@ -2,6 +2,7 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Security.Cryptography;
 using FluxForge.Application.Devices;
+using FluxForge.Application.Firmware;
 using FluxForge.Application.Formats;
 using FluxForge.Application.Gw;
 using FluxForge.Application.Processes;
@@ -41,6 +42,9 @@ public sealed class JobRunner(IProcessRunner runner, IJobStore store, TimeProvid
     private int _active;
 
     public static readonly TimeSpan HardwareJobTimeout = TimeSpan.FromMinutes(30);
+
+    /// <summary>How long a board gets to restart into new firmware before it is asked its version.</summary>
+    public TimeSpan FirmwareRestartDelay { get; init; } = TimeSpan.FromSeconds(3);
 
     public bool HasActiveJobs => Volatile.Read(ref _active) > 0;
 
@@ -157,6 +161,58 @@ public sealed class JobRunner(IProcessRunner runner, IJobStore store, TimeProvid
             var final = await FinishAsync(record, result, status, detail, tracker, [], progress).ConfigureAwait(false);
             return (final, result);
         });
+
+    /// <summary>
+    /// Flash the main firmware with <c>gw update</c>, then confirm with <c>gw info</c>. It cannot be
+    /// cancelled and is never killed or reset mid-flash: interrupting it is how boards end up needing
+    /// recovery. Success needs gw's "Done." and the board reporting the new version afterwards.
+    /// </summary>
+    public Task<JobRecord> RunFirmwareUpdateAsync(HostToolsInstallation tools, ReleaseInfo release, DeviceTarget target, GwInfo? device,
+        IProgress<JobProgress>? progress) =>
+        WithDeviceAsync(target.Port, async () =>
+        {
+            var args = GwCommands.UpdateFirmware(release.Version, target);
+            var record = NewRecord(JobKind.FirmwareUpdate, $"Update firmware {device?.Firmware ?? "?"} to {release.Version}", tools, device, args)
+                with { DevicePort = target.Port ?? device?.Port };
+            var sw = Stopwatch.StartNew();
+            progress?.Report(new JobProgress(JobStatus.Running, TimeSpan.Zero));
+            var lines = new SyncProgress<OutputLine>(line => progress?.Report(new JobProgress(JobStatus.Running, sw.Elapsed, line)));
+            var result = await runner.RunAsync(new ProcessRequest(tools.ExecutablePath, args, Timeout: TimeSpan.FromMinutes(10)), lines, CancellationToken.None)
+                .ConfigureAwait(false);
+            var update = FirmwareAssistant.ParseUpdate(result.Lines.Select(l => l.Text));
+
+            // Give a jumperless board a moment to restart into the new firmware, then ask it what it runs.
+            GwInfo? after = null;
+            ProcessResult? info = null;
+            if (update.Outcome is FirmwareUpdateOutcome.Flashed or FirmwareUpdateOutcome.AlreadyCurrent)
+            {
+                await Task.Delay(FirmwareRestartDelay).ConfigureAwait(false);
+                info = await runner.RunAsync(new ProcessRequest(tools.ExecutablePath, GwCommands.Info(new DeviceTarget(target.Port)), Timeout: TimeSpan.FromSeconds(30)),
+                    lines, CancellationToken.None).ConfigureAwait(false);
+                after = GwOutputParser.ParseInfo(string.Join('\n', info.Lines.Select(l => l.Text)));
+            }
+            var (status, detail) = EvaluateFirmwareUpdate(result, update, release.Version, after);
+            var log = info is null ? result : result with { Lines = [.. result.Lines, .. info.Lines] };
+            return await FinishAsync(record, log, status, detail, new TrackProgressTracker(), [], progress,
+                r => r with { Firmware = after?.Firmware ?? r.Firmware }).ConfigureAwait(false);
+        });
+
+    public static (JobStatus Status, string Detail) EvaluateFirmwareUpdate(ProcessResult result, FirmwareUpdateResult update, GwVersion wanted, GwInfo? after)
+    {
+        const string recovery = " Don't unplug the board; try the update again. If it no longer responds, follow the recovery steps in the official firmware guide.";
+        if (result.TimedOut || LostConnection(result))
+            return (JobStatus.Interrupted, "The connection to the Greaseweazle was lost during the update. Its firmware state is unknown." + recovery);
+        if (update.Outcome == FirmwareUpdateOutcome.Failed || result.ExitCode is not 0)
+            return (JobStatus.Failed, $"The firmware update failed: {update.Message ?? LastError(result)}".TrimEnd() + recovery);
+        var jumper = update.NeedsJumperRemoved ? " Unplug the board and remove the update jumper." : "";
+        if (update.Outcome == FirmwareUpdateOutcome.AlreadyCurrent)
+            return (JobStatus.Succeeded, $"Nothing was written: {update.Message ?? "the board already runs this firmware."}{jumper}");
+        if (update.Outcome != FirmwareUpdateOutcome.Flashed)
+            return (JobStatus.CompletedUnverified, "gw finished without a clear result. Reconnect the board and check its firmware version under Home." + jumper);
+        return GwVersion.TryParse(after?.Firmware, out var now) && now >= wanted
+            ? (JobStatus.Succeeded, $"Firmware updated to {now}, confirmed by the board.{jumper}")
+            : (JobStatus.CompletedUnverified, $"gw reported the update done, but the board didn't confirm firmware {wanted}. Unplug it, plug it back in and check the version under Home.{jumper}");
+    }
 
     private SemaphoreSlim Lock(string? port) => _deviceLocks.GetOrAdd(port ?? "auto", _ => new SemaphoreSlim(1, 1));
 
