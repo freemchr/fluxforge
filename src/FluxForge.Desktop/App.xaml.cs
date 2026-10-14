@@ -47,6 +47,7 @@ public partial class App
         services.AddSingleton(new FormatRegistry());
 
         services.AddSingleton<AppState>();
+        services.AddSingleton<AppUpdateService>();
         services.AddSingleton<IDialogService, DialogService>();
         services.AddSingleton<ThemeService>();
         services.AddSingleton<ShellViewModel>();
@@ -66,6 +67,7 @@ public partial class App
         MainWindow = window;
         window.Show();
         _ = _services.GetRequiredService<AppState>().InitializeAsync();
+        _ = _services.GetRequiredService<AppUpdateService>().CheckAsync(userInitiated: false);
     }
 
     protected override void OnExit(ExitEventArgs e)

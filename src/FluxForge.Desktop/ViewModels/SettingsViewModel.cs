@@ -19,8 +19,21 @@ public sealed record ReleaseRow(ReleaseInfo Release, bool Installed, bool Active
 
 public sealed partial class SettingsViewModel(
     AppState state, ToolsSetupViewModel setup, IHostToolsManager tools, ISettingsStore settings,
-    ThemeService theme, AppPaths paths, IDialogService dialogs) : ObservableObject, IPageLifecycle
+    ThemeService theme, AppPaths paths, IDialogService dialogs, AppUpdateService appUpdates) : ObservableObject, IPageLifecycle
 {
+    public AppUpdateService AppUpdates { get; } = appUpdates;
+
+    [RelayCommand]
+    private Task CheckAppUpdateAsync() => AppUpdates.CheckAsync(userInitiated: true);
+
+    [RelayCommand]
+    private async Task InstallAppUpdateAsync()
+    {
+        if (await dialogs.ConfirmAsync($"Update FluxForge to {AppUpdates.AvailableVersion}?",
+                "FluxForge will download the update, close, and restart. Your settings, host tools and job history are kept.", "Update and restart"))
+            await AppUpdates.DownloadAndRestartAsync();
+    }
+
     public AppState State { get; } = state;
     public ToolsSetupViewModel Setup { get; } = setup;
     public ObservableCollection<ManagedVersion> ManagedVersions { get; } = [];
@@ -36,7 +49,7 @@ public sealed partial class SettingsViewModel(
     [ObservableProperty] public partial string? ReleasesError { get; set; }
     [ObservableProperty] public partial string? VersionError { get; set; }
 
-    public string AppVersion => typeof(SettingsViewModel).Assembly.GetName().Version?.ToString() ?? "";
+    public string AppVersion => AppUpdates.CurrentVersion;
 
     public void OnNavigatedTo()
     {

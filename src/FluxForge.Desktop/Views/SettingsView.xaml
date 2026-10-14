@@ -154,7 +154,16 @@
             <Border Style="{StaticResource FfCard}">
                 <StackPanel>
                     <TextBlock Text="About" Style="{StaticResource FfSectionHeader}" />
-                    <TextBlock Style="{StaticResource FfBody}" Text="{Binding AppVersion, StringFormat='FluxForge {0} — preview build'}" />
+                    <TextBlock Style="{StaticResource FfBody}" Text="{Binding AppVersion, StringFormat='FluxForge {0}'}" />
+                    <WrapPanel Margin="0,6,0,0">
+                        <ui:Button Content="Check for FluxForge updates" Icon="{ui:SymbolIcon ArrowSync24}" Command="{Binding CheckAppUpdateCommand}"
+                                   IsEnabled="{Binding AppUpdates.IsBusy, Converter={StaticResource Not}}" Margin="0,0,8,0" />
+                        <ui:Button Appearance="Primary" Icon="{ui:SymbolIcon ArrowDownload24}" Command="{Binding InstallAppUpdateCommand}"
+                                   Content="{Binding AppUpdates.AvailableVersion}" ContentStringFormat="Update to {0} and restart"
+                                   Visibility="{Binding AppUpdates.UpdateReady, Converter={StaticResource VisibleWhen}}" />
+                    </WrapPanel>
+                    <TextBlock Text="{Binding AppUpdates.Status}" Style="{StaticResource FfSubtitle}" Margin="0,4,0,0"
+                               Visibility="{Binding AppUpdates.Status, Converter={StaticResource VisibleWhen}}" />
                     <TextBlock Style="{StaticResource FfSubtitle}" Margin="0,4,0,8"
                                Text="FluxForge is an independent frontend and is not an official Greaseweazle product. Greaseweazle is created by Keir Fraser." />
                     <TextBlock Text="Support" Style="{StaticResource FfLabel}" />

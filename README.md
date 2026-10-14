@@ -85,6 +85,16 @@ planned. Copy-protected disks should be captured as raw flux (`.scp`).
   drive — a standard 3.5" PC drive reads Amiga and Atari ST DD disks
 - The Greaseweazle host tools, which FluxForge installs for you
 
+## Download and install
+
+1. Download **FluxForge.Desktop-win-Setup.exe** from the [latest release](https://github.com/freemchr/fluxforge/releases/latest).
+2. Run it. FluxForge installs just for your Windows user — no administrator rights needed — and adds
+   a Start menu shortcut. Prefer not to install? Use the **Portable** zip from the same page.
+3. FluxForge keeps itself up to date: Settings → About → **Check for FluxForge updates**.
+
+> Windows may show a SmartScreen warning for new releases while the app builds its reputation —
+> choose **More info → Run anyway**. Uninstalling FluxForge keeps your disk images, settings and history.
+
 ## Getting started
 
 1. Run FluxForge. On first launch, choose **Install official host tools…**, review the release and approve it.
@@ -109,57 +119,13 @@ It may be a 10-sector (800K) or 11-sector (880K) disk. FluxForge detects this an
 **Can I use an older Greaseweazle version?**
 Yes. Settings → Host tools versions lists every stable release; install or switch between them.
 
+## Contributing
+
+Developers: see [CONTRIBUTING.md](CONTRIBUTING.md) for building from source, testing without hardware
+and the project layout.
+
 ## Support
 
 Found a bug or have an idea? [Open an issue](https://github.com/freemchr/fluxforge/issues).
 When reporting a problem, attach the job report from **Activity → Export report**.
 If FluxForge saved one of your disks, you can [buy me a coffee](https://buymeacoffee.com/cjf077) ☕
-
----
-
-## For developers
-
-Product spec: [`docs/FluxForge_PRD_v1.0.md`](docs/FluxForge_PRD_v1.0.md) ·
-Hardware validation: [`docs/phase0-spike.md`](docs/phase0-spike.md) ·
-Open decisions: [`docs/open-decisions.md`](docs/open-decisions.md)
-
-### Layout
-
-```
-src/FluxForge.Application     domain, gw command builder, output parser, job runner (no UI)
-src/FluxForge.Infrastructure  process runner, GitHub releases, host-tools manager, JSON storage
-src/FluxForge.Desktop         WPF + WPF-UI shell, MVVM (CommunityToolkit.Mvvm)
-tools/FluxForge.FakeGw        development stand-in for gw.exe (builds as gw.exe) — never ship
-tests/FluxForge.Tests         xUnit tests, including replays of real Greaseweazle output
-fixtures/gw-1.23              captured gw output from real hardware (images stay local)
-scripts/spike                 fixture capture against real hardware
-```
-
-### Build and test
-
-Requires the .NET 10 SDK on Windows.
-
-```powershell
-dotnet build FluxForge.slnx
-dotnet test tests/FluxForge.Tests
-dotnet run --project src/FluxForge.Desktop
-```
-
-### Developing without hardware
-
-1. `dotnet build tools/FluxForge.FakeGw -o C:\dev\fakegw`
-2. In FluxForge: **Settings → Use my own gw.exe…** and pick `C:\dev\fakegw\gw.exe`.
-3. Optional environment variables before launching the app:
-   - `FLUXFORGE_FAKEGW_SCENARIO` = `ok` (default) | `nodevice` | `badtracks` | `fail`
-   - `FLUXFORGE_FAKEGW_DELAY_MS` = per-track delay (default 25)
-   - `FLUXFORGE_HOME` = alternative data folder (default `%LOCALAPPDATA%\FluxForge`)
-
-The fake prints a `FLUXFORGE-SIMULATED` marker. The app then shows **SIMULATED HARDWARE** and labels
-every job and report as simulated.
-
-### Brand assets
-
-`assets/brand/`: `fluxforge-logo-original.png` is the master artwork. `fluxforge-logo.png`,
-`fluxforge-icon.png` and `fluxforge-wordmark.png` are transparent cut-outs of it, and
-`fluxforge.ico` is the multi-size app icon (16–256 px).
-

@@ -1,0 +1,53 @@
+name: Release
+
+# Push a tag like v0.2.0 to build, test, package and publish a GitHub release with
+# Setup.exe, a portable zip and Velopack update packages (used by in-app updates).
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+env:
+  VPK_VERSION: 1.2.161
+
+jobs:
+  release:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Version from tag
+        shell: pwsh
+        run: |
+          $version = '${{ github.ref_name }}'.TrimStart('v')
+          "VERSION=$version" | Out-File -FilePath $env:GITHUB_ENV -Append
+
+      - name: Test
+        run: dotnet test tests/FluxForge.Tests -c Release
+
+      - name: Publish
+        run: dotnet publish src/FluxForge.Desktop -c Release -r win-x64 --self-contained -p:Version=${{ env.VERSION }} -o publish
+
+      - name: Install vpk
+        run: dotnet tool install -g vpk --version ${{ env.VPK_VERSION }}
+
+      - name: Download previous release (for delta updates)
+        continue-on-error: true
+        run: vpk download github --repoUrl https://github.com/${{ github.repository }} --token ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Pack
+        run: >
+          vpk pack --packId FluxForge.Desktop --packVersion ${{ env.VERSION }} --packDir publish
+          --mainExe FluxForge.exe --packTitle FluxForge --packAuthors "Chris Freeman"
+          --icon src/FluxForge.Desktop/Assets/fluxforge.ico
+
+      - name: Publish GitHub release
+        run: >
+          vpk upload github --repoUrl https://github.com/${{ github.repository }} --token ${{ secrets.GITHUB_TOKEN }}
+          --publish --releaseName "FluxForge ${{ env.VERSION }}" --tag ${{ github.ref_name }}
