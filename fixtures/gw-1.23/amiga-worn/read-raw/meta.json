@@ -2,7 +2,7 @@
     "args":  [
                  "read",
                  "--drive=B",
-                 "\\\\wsl.localhost\\Ubuntu-26.04\\home\\freemchr\\github\\fluxforge\\fixtures\\gw-1.23\\amiga-good\\images\\raw.scp"
+                 "<fixture>\\images\\raw.scp"
              ],
     "exitCode":  0,
     "seconds":  148.87

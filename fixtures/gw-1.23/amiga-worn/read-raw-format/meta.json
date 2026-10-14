@@ -4,7 +4,7 @@
                  "--format=amiga.amigados",
                  "--raw",
                  "--drive=B",
-                 "\\\\wsl.localhost\\Ubuntu-26.04\\home\\freemchr\\github\\fluxforge\\fixtures\\gw-1.23\\amiga-good\\images\\raw-format.scp"
+                 "<fixture>\\images\\raw-format.scp"
              ],
     "exitCode":  0,
     "seconds":  231.58

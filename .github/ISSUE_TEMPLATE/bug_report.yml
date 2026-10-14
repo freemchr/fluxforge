@@ -1,0 +1,41 @@
+name: Bug report
+description: Something in FluxForge didn't work as expected.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for helping improve FluxForge! The most useful thing you can attach is the **job report**:
+        Activity → select the job → **Export report…** (tick "Redact folder paths" if you prefer).
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: What did you do, what did you expect, and what happened instead?
+    validations:
+      required: true
+  - type: textarea
+    id: report
+    attributes:
+      label: Job report
+      description: Paste the exported job report, or drag the .txt file here.
+      render: text
+  - type: input
+    id: fluxforge-version
+    attributes:
+      label: FluxForge version
+      description: Settings → About.
+      placeholder: "0.1.0"
+    validations:
+      required: true
+  - type: input
+    id: hardware
+    attributes:
+      label: Greaseweazle board and firmware
+      description: Shown in the status bar at the bottom of the window.
+      placeholder: "Greaseweazle V4.1, firmware 1.6, gw 1.23"
+  - type: input
+    id: windows
+    attributes:
+      label: Windows version
+      placeholder: "Windows 11 24H2"

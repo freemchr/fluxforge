@@ -1,0 +1,67 @@
+name: Hardware test report
+description: Tried FluxForge with your Greaseweazle? Tell us how it went — good results help too.
+labels: [hardware-report]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Every board, drive and disk combination we hear about makes FluxForge more reliable.
+        Reports of things **working** are just as valuable as problems.
+  - type: input
+    id: board
+    attributes:
+      label: Greaseweazle board and firmware
+      placeholder: "V4.1, firmware 1.6"
+    validations:
+      required: true
+  - type: input
+    id: drive
+    attributes:
+      label: Drive and cable
+      description: Drive model if known, 3.5"/5.25", and whether FluxForge needed drive A or B.
+      placeholder: "3.5\" PC drive, straight cable, drive B"
+    validations:
+      required: true
+  - type: dropdown
+    id: system
+    attributes:
+      label: Disk type
+      multiple: true
+      options:
+        - Commodore Amiga
+        - Atari ST
+        - IBM PC / MS-DOS
+        - Commodore 64
+        - Other (describe below)
+    validations:
+      required: true
+  - type: checkboxes
+    id: tested
+    attributes:
+      label: What did you try?
+      options:
+        - label: Preservation read (raw flux .scp)
+        - label: Sector image read (.adf / .st / .img / .d64)
+        - label: Write an image to a disk
+        - label: Decode a raw capture in Image Studio
+        - label: Host tools install / update / older version
+  - type: dropdown
+    id: result
+    attributes:
+      label: Overall result
+      options:
+        - Everything worked
+        - Worked with some problems
+        - Did not work
+    validations:
+      required: true
+  - type: textarea
+    id: notes
+    attributes:
+      label: Details
+      description: What FluxForge reported (Succeeded / Partial / Failed), anything surprising, and job reports for any problems.
+  - type: input
+    id: version
+    attributes:
+      label: FluxForge version
+      placeholder: "0.1.0"

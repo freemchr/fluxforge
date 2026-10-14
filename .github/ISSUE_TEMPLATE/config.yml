@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Greaseweazle hardware or gw.exe problems
+    url: https://github.com/keirf/greaseweazle/discussions
+    about: Problems with the Greaseweazle board, firmware or the gw command itself belong with the Greaseweazle project.
+  - name: Support FluxForge
+    url: https://buymeacoffee.com/cjf077
+    about: If FluxForge saved one of your disks, you can buy me a coffee.
