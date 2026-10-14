@@ -16,10 +16,20 @@ public partial class MainWindow : FluentWindow
     private const double PreferredWidth = 1320, PreferredHeight = 900, ScreenMargin = 24;
 
     private readonly ISettingsStore _settings;
+    private readonly AppState _state;
+    private readonly System.Windows.Threading.DispatcherTimer _usbDebounce;
 
-    public MainWindow(ShellViewModel viewModel, ISettingsStore settings)
+    public MainWindow(ShellViewModel viewModel, ISettingsStore settings, AppState state)
     {
         _settings = settings;
+        _state = state;
+        // USB plug/unplug arrives as a burst of WM_DEVICECHANGE messages; re-detect once it settles.
+        _usbDebounce = new System.Windows.Threading.DispatcherTimer { Interval = TimeSpan.FromSeconds(1.5) };
+        _usbDebounce.Tick += async (_, _) =>
+        {
+            _usbDebounce.Stop();
+            if (!_state.IsJobRunning) await _state.DetectDeviceAsync();
+        };
         DataContext = viewModel;
         InitializeComponent();
         WindowStartupLocation = WindowStartupLocation.Manual;
@@ -34,6 +44,7 @@ public partial class MainWindow : FluentWindow
     protected override void OnSourceInitialized(EventArgs e)
     {
         base.OnSourceInitialized(e);
+        HwndSource.FromHwnd(new WindowInteropHelper(this).Handle)?.AddHook(OnWindowMessage);
         var work = MonitorWorkArea();
         var saved = _settings.Load().Window;
 
@@ -75,6 +86,19 @@ public partial class MainWindow : FluentWindow
         var dpi = VisualTreeHelper.GetDpi(this);
         return new Rect(info.Work.Left / dpi.DpiScaleX, info.Work.Top / dpi.DpiScaleY,
             (info.Work.Right - info.Work.Left) / dpi.DpiScaleX, (info.Work.Bottom - info.Work.Top) / dpi.DpiScaleY);
+    }
+
+    private const int WmDeviceChange = 0x0219;
+
+    /// <summary>Re-check the Greaseweazle whenever Windows reports USB devices arriving or leaving.</summary>
+    private IntPtr OnWindowMessage(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
+    {
+        if (msg == WmDeviceChange && _state.ToolsReady)
+        {
+            _usbDebounce.Stop();
+            _usbDebounce.Start();
+        }
+        return IntPtr.Zero;
     }
 
     private const uint MonitorDefaultToNearest = 2;

@@ -10,8 +10,8 @@
              mc:Ignorable="d"
              d:DataContext="{d:DesignInstance vm:HomeViewModel}">
     <ScrollViewer VerticalScrollBarVisibility="Auto">
-        <StackPanel Margin="20,14,20,20" MaxWidth="1000" HorizontalAlignment="Left">
-            <Image Source="{StaticResource FfLogo}" Height="110" HorizontalAlignment="Left" Margin="0,0,0,14"
+        <StackPanel Margin="20,14,20,20" MaxWidth="1100" HorizontalAlignment="Center">
+            <Image Source="{StaticResource FfLogo}" Height="120" HorizontalAlignment="Center" Margin="0,4,0,18"
                    RenderOptions.BitmapScalingMode="HighQuality" AutomationProperties.Name="FluxForge — Preserve the past one disk at a time" />
 
             <!-- First-run: host tools missing -->
@@ -123,7 +123,7 @@
                                         <StackPanel Grid.Column="2" Margin="12,0,0,0">
                                             <TextBlock Text="{Binding Status, Converter={StaticResource Status}}" HorizontalAlignment="Right"
                                                        Foreground="{Binding Status, Converter={StaticResource Status}, ConverterParameter=brush}" FontSize="12" />
-                                            <TextBlock Text="{Binding StartedAt, StringFormat='{}{0:d MMM HH:mm}'}" HorizontalAlignment="Right"
+                                            <TextBlock Text="{Binding StartedAt, Converter={StaticResource LocalTime}, StringFormat='{}{0:d MMM HH:mm}'}" HorizontalAlignment="Right"
                                                        Style="{StaticResource FfSubtitle}" FontSize="11" />
                                         </StackPanel>
                                     </Grid>

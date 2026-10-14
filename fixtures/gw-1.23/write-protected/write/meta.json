@@ -1,0 +1,5 @@
+{
+  "args": ["write", "--format=amiga.amigados", "--drive=B", "<backup>\\before.adf"],
+  "exitCode": 0,
+  "note": "Write to a write-protected disk. gw prints the first Writing Track line, then fails, and still exits 0."
+}

@@ -18,7 +18,7 @@
         </Grid.ColumnDefinitions>
 
         <ScrollViewer VerticalScrollBarVisibility="Auto">
-            <StackPanel Margin="0,0,8,24" IsEnabled="{Binding IsRunning, Converter={StaticResource Not}}">
+            <StackPanel Margin="0,0,18,24" IsEnabled="{Binding IsRunning, Converter={StaticResource Not}}">
                 <TextBlock Text="Read Disk" Style="{StaticResource FfPageTitle}" />
                 <TextBlock Text="Back up a floppy. Choose a preservation capture for anything irreplaceable." Style="{StaticResource FfSubtitle}" Margin="0,0,0,10" />
 
@@ -114,7 +114,7 @@
 
         <!-- Run controls stay enabled while a job runs so Cancel is reachable. -->
         <DockPanel Grid.Column="2">
-            <Border DockPanel.Dock="Top" Style="{StaticResource FfCard}">
+            <Border DockPanel.Dock="Top" Style="{StaticResource FfCard}" Margin="0,0,18,8">
                 <StackPanel>
                     <WrapPanel>
                         <ui:Button Appearance="Primary" Content="Start read" Icon="{ui:SymbolIcon Play24}" Height="34" MinWidth="140"
@@ -126,7 +126,7 @@
                 </StackPanel>
             </Border>
             <ScrollViewer VerticalScrollBarVisibility="Auto">
-                <StackPanel Margin="0,0,0,24">
+                <StackPanel Margin="0,0,18,24">
                     <Border Style="{StaticResource FfCard}">
                         <Grid>
                             <Grid.ColumnDefinitions>
@@ -166,7 +166,7 @@
                                 </ItemsControl.ItemTemplate>
                             </ItemsControl>
                             <WrapPanel Margin="0,8,0,0">
-                                <ui:Button Content="Show in folder" Icon="{ui:SymbolIcon FolderOpen24}" Command="{Binding ShowResultCommand}" Margin="0,0,8,0" />
+                                <ui:Button Content="Show in folder" Icon="{ui:SymbolIcon FolderOpen24}" Command="{Binding ShowResultCommand}" Visibility="{Binding LastResult.Artifacts, Converter={StaticResource VisibleWhen}}" Margin="0,0,8,0" />
                                 <ui:Button Content="Read another disk" Icon="{ui:SymbolIcon Add24}" Command="{Binding NewCaptureCommand}" />
                             </WrapPanel>
                         </StackPanel>

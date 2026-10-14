@@ -243,14 +243,23 @@ public sealed class JobRunner(IProcessRunner runner, IJobStore store, TimeProvid
     public static (JobStatus Status, string Detail) EvaluateRead(ProcessResult result, TrackProgressTracker tracker,
         CaptureMode mode, DiskProfile? profile, bool outputExists, bool fromRawCapture = false)
     {
-        if (result.Cancelled)
-            return (JobStatus.Cancelled, "Cancelled. Any captured data is incomplete and labelled as such.");
-        if (result.TimedOut)
-            return (JobStatus.Failed, "The read timed out and was stopped. Captured data is incomplete.");
+        if (result.Cancelled || result.TimedOut)
+        {
+            var where = Where(tracker);
+            var kept = outputExists
+                ? " The partial file was kept and labelled (INCOMPLETE)."
+                : " Nothing was saved — gw only writes the image file when a read finishes.";
+            return result.Cancelled
+                ? (JobStatus.Cancelled, $"Cancelled{where}.{kept}")
+                : (JobStatus.Failed, $"The read timed out{where} and was stopped.{kept}");
+        }
+        if (LostConnection(result))
+            return (JobStatus.Failed, $"Lost connection to the Greaseweazle{Where(tracker)} — the USB cable may have been unplugged or the board reset. "
+                + (outputExists ? "The partial file was kept and labelled (INCOMPLETE)." : "Nothing was saved."));
         if (result.ExitCode != 0)
             return (JobStatus.Failed, $"gw exited with code {result.ExitCode}. {LastError(result)}".Trim());
         if (tracker.FatalError is { } fatal)
-            return (JobStatus.Failed, $"gw reported: {fatal}{Hint(fatal)}");
+            return (JobStatus.Failed, $"gw reported: {Sentence(fatal)}{Hint(fatal)}");
         if (!outputExists)
             return (JobStatus.Failed, "gw reported success but no image file was produced.");
 
@@ -293,10 +302,14 @@ public sealed class JobRunner(IProcessRunner runner, IJobStore store, TimeProvid
     {
         if (result.Cancelled || result.TimedOut)
             return (JobStatus.Interrupted, "The write was interrupted. The floppy's contents are now in an unknown state.");
+        if (LostConnection(result))
+            return (JobStatus.Interrupted, $"Lost connection to the Greaseweazle{Where(tracker)} — the USB cable may have been unplugged or the board reset. The floppy's contents are now in an unknown state.");
         if (result.ExitCode != 0)
             return (JobStatus.Failed, $"Write failed: gw exited with code {result.ExitCode}. {LastError(result)}".Trim());
+        if (tracker is { WriteProtected: true })
+            return (JobStatus.Failed, "Nothing was written — the disk is write-protected. To overwrite it, slide the write-protect tab to writable and try again.");
         if (tracker?.FatalError is { } fatal)
-            return (JobStatus.Failed, $"Write failed — gw reported: {fatal}{Hint(fatal)} The disk may be partly written.");
+            return (JobStatus.Failed, $"Write failed — gw reported: {Sentence(fatal)}{Hint(fatal)} The disk may be partly written.");
         var raw = GwCommands.RawFluxExtensions.Contains(Path.GetExtension(request.ImagePath));
         if (!request.Verify)
             return (JobStatus.CompletedUnverified, "Write finished. Verification was turned off, so the disk was not checked.");
@@ -311,13 +324,27 @@ public sealed class JobRunner(IProcessRunner runner, IJobStore store, TimeProvid
     }
 
     // gw writes all of its output (progress included) to stderr, so stream alone doesn't mark an error.
+    /// <summary>
+    /// gw 1.23 on Windows, cable pulled mid-job: "WriteFile failed (PermissionError(13, 'The device does
+    /// not recognize the command.' ...))". Serial-port read/open failures look similar.
+    /// </summary>
+    private static bool LostConnection(ProcessResult result) =>
+        result.Lines.Any(l => l.Text.Contains("WriteFile failed", StringComparison.OrdinalIgnoreCase)
+                              || l.Text.Contains("ReadFile failed", StringComparison.OrdinalIgnoreCase)
+                              || l.Text.Contains("device does not recognize the command", StringComparison.OrdinalIgnoreCase)
+                              || l.Text.Contains("could not open port", StringComparison.OrdinalIgnoreCase)
+                              || l.Text.Contains("SerialException", StringComparison.Ordinal));
+
+    private static string Where(TrackProgressTracker? tracker) =>
+        tracker is { Tracks.Count: > 0 } t ? $" at cylinder {t.Tracks.Max(x => x.Cylinder)}" : "";
+
+    private static string Sentence(string text) => text.TrimEnd().EndsWith('.') ? text.TrimEnd() : text.TrimEnd() + ".";
+
     /// <summary>Plain-language hints for the common hardware errors seen on real boards.</summary>
     private static string Hint(string error) =>
         error.Contains("Track 0 not found", StringComparison.OrdinalIgnoreCase) || error.Contains("No Index", StringComparison.OrdinalIgnoreCase)
             ? " The drive did not respond: check the drive selection (A/B for PC cables — a straight cable usually means B), drive power, and that a disk is inserted."
-            : error.Contains("write protect", StringComparison.OrdinalIgnoreCase)
-                ? " The disk is write-protected."
-                : "";
+            : "";
 
     private static string LastError(ProcessResult result) =>
         result.Lines.LastOrDefault(l => l.Text.Contains("ERROR", StringComparison.OrdinalIgnoreCase))?.Text.Trim().TrimStart('*', ' ')

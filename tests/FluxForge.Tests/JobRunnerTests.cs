@@ -66,6 +66,15 @@ public class JobRunnerTests
         Assert.StartsWith("Raw flux captured", detail);
     }
 
+    [Fact]
+    public void Cancel_message_says_where_and_whether_anything_was_kept()
+    {
+        var t = Tracker("T21.1: AmigaDOS (11/11 sectors) from Raw Flux (125452 flux in 497.31ms)");
+        Assert.Equal("Cancelled at cylinder 21. Nothing was saved — gw only writes the image file when a read finishes.",
+            JobRunner.EvaluateRead(Exit(null, cancelled: true), t, CaptureMode.SectorImage, Amiga, outputExists: false).Detail);
+        Assert.EndsWith("(INCOMPLETE).", JobRunner.EvaluateRead(Exit(null, cancelled: true), t, CaptureMode.SectorImage, Amiga, outputExists: true).Detail);
+    }
+
     [Theory]
     [InlineData(1, false, true, JobStatus.Failed)]
     [InlineData(null, true, true, JobStatus.Cancelled)]

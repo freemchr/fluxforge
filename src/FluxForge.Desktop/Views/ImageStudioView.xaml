@@ -18,7 +18,7 @@
         </Grid.ColumnDefinitions>
 
         <ScrollViewer VerticalScrollBarVisibility="Auto">
-            <StackPanel Margin="0,0,8,24" IsEnabled="{Binding IsRunning, Converter={StaticResource Not}}">
+            <StackPanel Margin="0,0,18,24" IsEnabled="{Binding IsRunning, Converter={StaticResource Not}}">
                 <TextBlock Text="Image Studio" Style="{StaticResource FfPageTitle}" />
                 <TextBlock Style="{StaticResource FfSubtitle}" Margin="0,0,0,10"
                            Text="Decode a saved raw flux capture into a disk image, with any format, without touching the disk again." />
@@ -80,7 +80,7 @@
         </ScrollViewer>
 
         <DockPanel Grid.Column="2">
-            <Border DockPanel.Dock="Top" Style="{StaticResource FfCard}">
+            <Border DockPanel.Dock="Top" Style="{StaticResource FfCard}" Margin="0,0,18,8">
                 <StackPanel>
                     <WrapPanel>
                         <ui:Button Appearance="Primary" Content="Decode" Icon="{ui:SymbolIcon ArrowSwap24}" Height="34" MinWidth="140"
@@ -92,7 +92,7 @@
                 </StackPanel>
             </Border>
             <ScrollViewer VerticalScrollBarVisibility="Auto">
-                <StackPanel Margin="0,0,0,24">
+                <StackPanel Margin="0,0,18,24">
                     <Border Style="{StaticResource FfCard}">
                         <Grid>
                             <Grid.ColumnDefinitions>
@@ -141,7 +141,7 @@
                                     </DataTemplate>
                                 </ItemsControl.ItemTemplate>
                             </ItemsControl>
-                            <ui:Button Content="Show in folder" Icon="{ui:SymbolIcon FolderOpen24}" Command="{Binding ShowResultCommand}" Margin="0,8,0,0" />
+                            <ui:Button Content="Show in folder" Icon="{ui:SymbolIcon FolderOpen24}" Command="{Binding ShowResultCommand}" Visibility="{Binding LastResult.Artifacts, Converter={StaticResource VisibleWhen}}" Margin="0,8,0,0" />
                         </StackPanel>
                     </Border>
 

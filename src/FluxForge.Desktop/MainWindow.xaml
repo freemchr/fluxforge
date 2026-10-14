@@ -99,7 +99,11 @@
             <DockPanel Grid.Column="0" Margin="8,8,4,8">
                 <!-- Brand block, centred across the full sidebar width (the panel's outer margin is asymmetric). -->
                 <StackPanel DockPanel.Dock="Top" Margin="-8,2,-4,14" HorizontalAlignment="Stretch" AutomationProperties.Name="FluxForge">
-                    <Image Source="{StaticResource FfIcon}" Width="102" Height="102" HorizontalAlignment="Center" RenderOptions.BitmapScalingMode="HighQuality" />
+                    <!-- Optical centring: the round disc reads as the icon's centre, but the floppy and pixel trail
+                         extend to the right of it, so nudge the artwork right to look centred. -->
+                    <Image Source="{StaticResource FfIcon}" Width="102" Height="102" HorizontalAlignment="Center" RenderOptions.BitmapScalingMode="HighQuality">
+                        <Image.RenderTransform><TranslateTransform X="9" /></Image.RenderTransform>
+                    </Image>
                     <Image Source="{StaticResource FfWordmark}" Width="168" Margin="0,4,0,0" HorizontalAlignment="Center" RenderOptions.BitmapScalingMode="HighQuality" />
                 </StackPanel>
                 <StackPanel DockPanel.Dock="Bottom" Margin="4,8,4,4">

@@ -1,0 +1,4 @@
+Format amiga.amigados
+Writing c=0-79:h=0-1
+T0.0: Writing Track (Flux: 200.0ms period, 219.9 ms total, Terminate at index)
+Command Failed: WriteFlux: Disk is Write Protected

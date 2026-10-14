@@ -47,7 +47,7 @@
                                 <TextBlock FontSize="11" Foreground="{DynamicResource TextFillColorSecondaryBrush}">
                                     <Run Text="{Binding Status, Converter={StaticResource Status}, Mode=OneWay}" />
                                     <Run Text="·" />
-                                    <Run Text="{Binding StartedAt, StringFormat='{}{0:d MMM yyyy HH:mm}', Mode=OneWay}" />
+                                    <Run Text="{Binding StartedAt, Converter={StaticResource LocalTime}, StringFormat='{}{0:d MMM yyyy HH:mm}', Mode=OneWay}" />
                                 </TextBlock>
                             </StackPanel>
                         </Grid>

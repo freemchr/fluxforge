@@ -275,3 +275,43 @@ public class RealWriteTests
         Assert.Equal(new SectorSummary(1760, 1760), t.Summary);
     }
 }
+
+public class RealWriteProtectedTests
+{
+    [Fact]
+    public void Write_protected_disk_fails_and_shows_nothing_written()
+    {
+        var t = new TrackProgressTracker();
+        foreach (var line in File.ReadAllLines(Path.Combine(AppContext.BaseDirectory, "fixtures", "gw-1.23", "write-protected", "write", "stderr.txt")))
+            t.Feed(line);
+        t.Finish();
+
+        Assert.True(t.WriteProtected);
+        Assert.Empty(t.Tracks); // gw printed "T0.0: Writing Track" first, but nothing was written
+        var (status, detail) = Application.Jobs.JobRunner.EvaluateWrite(
+            new Application.Processes.ProcessResult(0, [], false, false, TimeSpan.Zero),
+            new WriteRequest(@"C:\backup\before.adf", FormatRegistry.BuiltIn[0], new DeviceTarget(null, "B")), t);
+        Assert.Equal(Application.Jobs.JobStatus.Failed, status);
+        Assert.StartsWith("Nothing was written — the disk is write-protected.", detail);
+    }
+}
+
+public class RealUsbUnpluggedTests
+{
+    [Fact]
+    public void Pulling_the_cable_mid_read_is_reported_in_plain_language()
+    {
+        var lines = File.ReadAllLines(Path.Combine(AppContext.BaseDirectory, "fixtures", "gw-1.23", "usb-unplugged", "read", "stderr.txt"));
+        var t = new TrackProgressTracker();
+        foreach (var l in lines) t.Feed(l);
+        t.Finish();
+        var result = new Application.Processes.ProcessResult(1,
+            [.. lines.Select(l => new Application.Processes.OutputLine(Application.Processes.OutputStream.StdErr, l, DateTimeOffset.Now))],
+            false, false, TimeSpan.Zero);
+
+        var (status, detail) = Application.Jobs.JobRunner.EvaluateRead(result, t, CaptureMode.Preservation, FormatRegistry.BuiltIn[0], outputExists: false);
+
+        Assert.Equal(Application.Jobs.JobStatus.Failed, status);
+        Assert.Equal("Lost connection to the Greaseweazle at cylinder 9 — the USB cable may have been unplugged or the board reset. Nothing was saved.", detail);
+    }
+}

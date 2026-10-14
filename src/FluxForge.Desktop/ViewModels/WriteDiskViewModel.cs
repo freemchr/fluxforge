@@ -186,6 +186,8 @@ public sealed partial class WriteDiskViewModel : ObservableObject, IPageLifecycl
             LastResult = await Task.Run(() => _jobs.RunWriteAsync(new WriteJob(tools, request, State.Device.Info), progress, _cts.Token));
             TrackMap.Stop();
             Console.Stop(LastResult.Status);
+            TrackMap.Reset(p0?.Cylinders ?? 84, p0?.Heads ?? 2);
+            if (LastResult.Tracks.Count == 0) Console.CurrentTrack = "No tracks were written.";
             TrackMap.Load(LastResult.Tracks);
         }
         catch (Exception e) when (e is DeviceBusyException or InvalidOperationException or GwCommandException or IOException)

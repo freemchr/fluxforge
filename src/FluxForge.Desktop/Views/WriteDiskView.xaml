@@ -18,7 +18,7 @@
         </Grid.ColumnDefinitions>
 
         <ScrollViewer VerticalScrollBarVisibility="Auto">
-            <StackPanel Margin="0,0,8,24" IsEnabled="{Binding IsRunning, Converter={StaticResource Not}}">
+            <StackPanel Margin="0,0,18,24" IsEnabled="{Binding IsRunning, Converter={StaticResource Not}}">
                 <TextBlock Text="Write Disk" Style="{StaticResource FfPageTitle}" />
                 <TextBlock Text="Write an image to a floppy. This replaces everything on the target disk." Style="{StaticResource FfSubtitle}" Margin="0,0,0,10" />
 
@@ -82,7 +82,7 @@
         </ScrollViewer>
 
         <DockPanel Grid.Column="2">
-            <Border DockPanel.Dock="Top" Style="{StaticResource FfCard}">
+            <Border DockPanel.Dock="Top" Style="{StaticResource FfCard}" Margin="0,0,18,8">
                 <StackPanel>
                     <WrapPanel>
                         <ui:Button Appearance="Danger" Content="Write disk…" Icon="{ui:SymbolIcon ArrowUpload24}" Height="34" MinWidth="140"
@@ -94,7 +94,7 @@
                 </StackPanel>
             </Border>
             <ScrollViewer VerticalScrollBarVisibility="Auto">
-                <StackPanel Margin="0,0,0,24">
+                <StackPanel Margin="0,0,18,24">
                     <Border Style="{StaticResource FfCard}">
                         <Grid>
                             <Grid.ColumnDefinitions>

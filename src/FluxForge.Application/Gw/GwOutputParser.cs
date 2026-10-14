@@ -198,8 +198,16 @@ public sealed class TrackProgressTracker
     /// Call once the process has exited. Tracks left mid-retry with a known shortfall become
     /// <see cref="TrackStatus.Unreadable"/>; tracks with no evidence stay unresolved.
     /// </summary>
+    public bool WriteProtected => FatalError?.Contains("Write Protected", StringComparison.OrdinalIgnoreCase) == true;
+
     public void Finish()
     {
+        // gw prints the first "Writing Track" line before it discovers write protection, but nothing
+        // was written: don't show any track as written.
+        if (WriteProtected)
+            foreach (var key in _tracks.Where(t => t.Value.Status == TrackStatus.Written).Select(t => t.Key).ToList())
+                _tracks.Remove(key);
+
         foreach (var (key, t) in _tracks.ToList())
         {
             if (t.Status == TrackStatus.Reading && t.SectorsTotal is { } total && t.SectorsFound < total)

@@ -5,6 +5,7 @@
     <c:StatusConverter x:Key="Status" />
     <c:VisibleWhenConverter x:Key="VisibleWhen" />
     <c:InverseBoolConverter x:Key="Not" />
+    <c:LocalTimeConverter x:Key="LocalTime" />
 
     <!-- Status colours are always paired with a glyph and text label (PRD §6). -->
     <SolidColorBrush x:Key="FfSuccessBrush" Color="#3FB950" />

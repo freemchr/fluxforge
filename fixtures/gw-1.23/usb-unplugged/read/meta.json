@@ -1,0 +1,5 @@
+{
+  "args": ["read", "--format=amiga.amigados", "--raw", "--drive=B", "<out>\\unplug-test-2.scp"],
+  "exitCode": 1,
+  "note": "USB cable pulled at cylinder 9 during a real read (V4.1, gw 1.23)."
+}

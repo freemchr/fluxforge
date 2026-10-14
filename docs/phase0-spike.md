@@ -31,6 +31,24 @@ future gw release that changes its output fails CI instead of producing a false 
 - Captured fixtures live in `fixtures/gw-1.23/help-only/` (serial number and local paths redacted)
   and are exercised by `RealGwFixtureTests`.
 
+## Hardware test results (14 Oct 2026, V4.1 fw 1.6, 3.5" PC drive on drive B, gw 1.23)
+
+| Scenario | Result | Fixture |
+|---|---|---|
+| Worn Amiga disk | Partial, 28 tracks with missing sectors (repeatable sector-for-sector) | `amiga-worn` |
+| Known-good Amiga disk | 1,760/1,760, no retries | `amiga-known-good` |
+| Atari ST disk that is really 800K | Read as 720K: every track has an extra sector 10; offline decode as `atarist.800` gives 1,600/1,600 | `atarist-struggling` |
+| Wrong drive select (A instead of B) | `Command Failed: Seek: Track 0 not found`, **exit code 0** | `wrong-drive` |
+| Real write with verify | `All tracks verified`; independent read-back identical to the backup (SHA-256) | `write-test` |
+| Write to a write-protected disk | `Command Failed: WriteFlux: Disk is Write Protected`, exit 0; nothing written | `write-protected` |
+| Cancel mid-read | Cancelled at cylinder 21; `gw reset` succeeds; gw had not written any file yet | — |
+| USB cable pulled mid-read | `WriteFile failed (PermissionError(13, ...))`, exit 1 | `usb-unplugged` |
+| Replug into a different USB port | Windows kept COM6 (assigned per board serial) | — |
+| Unplug/replug while idle | FluxForge re-detects automatically (WM_DEVICECHANGE) | — |
+
+Lessons now encoded in FluxForge: never trust gw's exit code alone; gw writes the image file only
+when a read completes; gw prints the first `Writing Track` line before discovering write protection.
+
 ## Reference disks to collect
 
 Known-good: Amiga ADF, Atari ST ST, C64 D64, IBM PC 720K/1.44M. Known-bad: one disk with a few
