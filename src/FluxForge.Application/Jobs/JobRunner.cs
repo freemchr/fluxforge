@@ -125,6 +125,29 @@ public sealed class JobRunner(IProcessRunner runner, IJobStore store, TimeProvid
         return await FinishAsync(record, result, status, detail, tracker, artifacts, progress).ConfigureAwait(false);
     }
 
+    /// <summary>
+    /// Run a drive/device utility (rpm, seek, clean, erase…) under the device lock and record it in the
+    /// audit trail like any other job. Success needs a clean exit and no gw fatal error.
+    /// </summary>
+    public Task<(JobRecord Record, ProcessResult Result)> RunToolAsync(HostToolsInstallation tools, string title, IReadOnlyList<string> args,
+        DeviceTarget target, GwInfo? device, IProgress<JobProgress>? progress, CancellationToken ct, TimeSpan? timeout = null) =>
+        WithDeviceAsync(target.Port, async () =>
+        {
+            var record = NewRecord(JobKind.DriveTool, title, tools, device, args) with { DevicePort = target.Port ?? device?.Port };
+            var tracker = new TrackProgressTracker();
+            var result = await RunTrackedAsync(tools, args, tracker, progress, ct, timeout ?? TimeSpan.FromMinutes(10)).ConfigureAwait(false);
+            tracker.Finish();
+            var (status, detail) =
+                result.Cancelled ? (JobStatus.Cancelled, "Stopped by the user.") :
+                result.TimedOut ? (JobStatus.Failed, "The tool did not finish in time and was stopped.") :
+                LostConnection(result) ? (JobStatus.Failed, "Lost connection to the Greaseweazle. Check the USB cable.") :
+                result.ExitCode != 0 ? (JobStatus.Failed, $"gw exited with code {result.ExitCode}. {LastError(result)}".Trim()) :
+                tracker.FatalError is { } fatal ? (JobStatus.Failed, $"gw reported: {Sentence(fatal)}{Hint(fatal)}") :
+                (JobStatus.Succeeded, "Completed.");
+            var final = await FinishAsync(record, result, status, detail, tracker, [], progress).ConfigureAwait(false);
+            return (final, result);
+        });
+
     private SemaphoreSlim Lock(string? port) => _deviceLocks.GetOrAdd(port ?? "auto", _ => new SemaphoreSlim(1, 1));
 
     private async Task<JobRecord> ReadCoreAsync(ReadJob job, IProgress<JobProgress>? progress, CancellationToken ct)
@@ -198,7 +221,7 @@ public sealed class JobRunner(IProcessRunner runner, IJobStore store, TimeProvid
     }
 
     private async Task<ProcessResult> RunTrackedAsync(HostToolsInstallation tools, IReadOnlyList<string> args,
-        TrackProgressTracker tracker, IProgress<JobProgress>? progress, CancellationToken ct)
+        TrackProgressTracker tracker, IProgress<JobProgress>? progress, CancellationToken ct, TimeSpan? timeout = null)
     {
         var sw = Stopwatch.StartNew();
         progress?.Report(new JobProgress(JobStatus.Running, TimeSpan.Zero));
@@ -207,7 +230,7 @@ public sealed class JobRunner(IProcessRunner runner, IJobStore store, TimeProvid
             var track = tracker.Feed(line.Text);
             progress?.Report(new JobProgress(JobStatus.Running, sw.Elapsed, line, track));
         });
-        var result = await runner.RunAsync(new ProcessRequest(tools.ExecutablePath, args, Timeout: HardwareJobTimeout), lineProgress, ct).ConfigureAwait(false);
+        var result = await runner.RunAsync(new ProcessRequest(tools.ExecutablePath, args, Timeout: timeout ?? HardwareJobTimeout), lineProgress, ct).ConfigureAwait(false);
         if (!result.Cancelled && !result.TimedOut) return result;
 
         // Best-effort: stop the drive motor and release the board after killing gw mid-operation.

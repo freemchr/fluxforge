@@ -1,0 +1,8 @@
+Select Delay: 10us
+Step Delay:   10000us
+Settle Time:  15ms
+Motor Delay:  750ms
+Watchdog:     10000ms
+Pre-Write:    100us
+Post-Write:   1000us
+Index Mask:   200us

@@ -1,0 +1,8 @@
+
+                   Min.   /   Mean   /   Max.   
+Write Bandwidth:    8.935 /    8.946 /    9.001 Mbps
+Read Bandwidth:     8.542 /    8.691 /    8.882 Mbps
+
+Estimated Consistent Min. Bandwidth: 7.688 Mbps
+ -> Max. Flux Rate: 0.865 Msamples/sec
+ -> Min. Ave. Flux: 1.156 us

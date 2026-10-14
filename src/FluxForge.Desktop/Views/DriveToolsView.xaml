@@ -1,0 +1,159 @@
+<UserControl x:Class="FluxForge.Desktop.Views.DriveToolsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+             xmlns:vm="clr-namespace:FluxForge.Desktop.ViewModels"
+             mc:Ignorable="d"
+             d:DataContext="{d:DesignInstance vm:DriveToolsViewModel}">
+    <Grid Margin="16,12,16,0">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" MinWidth="420" />
+            <ColumnDefinition Width="14" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <ScrollViewer VerticalScrollBarVisibility="Auto">
+            <StackPanel Margin="0,0,18,24">
+                <TextBlock Text="Drive Tools" Style="{StaticResource FfPageTitle}" />
+                <TextBlock Style="{StaticResource FfSubtitle}" Margin="0,0,0,10"
+                           Text="Check your drive and Greaseweazle, move the heads, clean them, or erase a disk. Every run is recorded under Activity." />
+
+                <Border Style="{StaticResource FfCard}">
+                    <DockPanel>
+                        <ComboBox DockPanel.Dock="Right" ItemsSource="{Binding Drives}" SelectedItem="{Binding Drive}" Width="90"
+                                  AutomationProperties.Name="Drive" />
+                        <TextBlock Text="Drive" Style="{StaticResource FfSectionHeader}" VerticalAlignment="Center" Margin="0" />
+                    </DockPanel>
+                </Border>
+                <TextBlock Text="{Binding BlockedReason}" Style="{StaticResource FfBody}" Foreground="{StaticResource FfWarningBrush}" Margin="0,0,0,8"
+                           Visibility="{Binding BlockedReason, Converter={StaticResource VisibleWhen}}" />
+
+                <!-- Read-only health checks -->
+                <Border Style="{StaticResource FfCard}">
+                    <StackPanel>
+                        <DockPanel>
+                            <ui:Button DockPanel.Dock="Right" Content="Measure" Icon="{ui:SymbolIcon Gauge24}" Command="{Binding MeasureRpmCommand}" />
+                            <StackPanel>
+                                <TextBlock Text="Drive speed" Style="{StaticResource FfSectionHeader}" Margin="0,0,0,2" />
+                                <TextBlock Text="Spins the disk and measures its speed. Reads and writes nothing. Needs a disk inserted." Style="{StaticResource FfSubtitle}" />
+                            </StackPanel>
+                        </DockPanel>
+                        <StackPanel Margin="0,10,0,0" Visibility="{Binding Rpm, Converter={StaticResource VisibleWhen}}">
+                            <TextBlock FontSize="24" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorPrimaryBrush}">
+                                <Run Text="{Binding Rpm.Rpm, StringFormat='{}{0:0.00}', Mode=OneWay}" /><Run Text=" RPM" FontSize="14" />
+                                <Run Text="{Binding Rpm.PeriodMs, StringFormat='({0:0.00} ms per turn)', Mode=OneWay}" FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                            </TextBlock>
+                            <TextBlock Text="{Binding Rpm.Verdict}" Style="{StaticResource FfBody}" />
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+
+                <Border Style="{StaticResource FfCard}">
+                    <StackPanel>
+                        <DockPanel>
+                            <ui:Button DockPanel.Dock="Right" Content="Test" Icon="{ui:SymbolIcon UsbStick24}" Command="{Binding TestBandwidthCommand}" />
+                            <StackPanel>
+                                <TextBlock Text="USB connection" Style="{StaticResource FfSectionHeader}" Margin="0,0,0,2" />
+                                <TextBlock Text="Measures how fast data moves between the PC and the Greaseweazle. No disk needed." Style="{StaticResource FfSubtitle}" />
+                            </StackPanel>
+                        </DockPanel>
+                        <StackPanel Margin="0,10,0,0" Visibility="{Binding Bandwidth, Converter={StaticResource VisibleWhen}}">
+                            <TextBlock Style="{StaticResource FfBody}">
+                                <Run Text="Write" Foreground="{DynamicResource TextFillColorSecondaryBrush}" /> <Run Text="{Binding Bandwidth.WriteMeanMbps, StringFormat='{}{0:0.0} Mbit/s', Mode=OneWay}" FontWeight="SemiBold" />
+                                <Run Text="   Read" Foreground="{DynamicResource TextFillColorSecondaryBrush}" /> <Run Text="{Binding Bandwidth.ReadMeanMbps, StringFormat='{}{0:0.0} Mbit/s', Mode=OneWay}" FontWeight="SemiBold" />
+                                <Run Text="   Worst case" Foreground="{DynamicResource TextFillColorSecondaryBrush}" /> <Run Text="{Binding Bandwidth.ConsistentMinMbps, StringFormat='{}{0:0.0} Mbit/s', Mode=OneWay}" FontWeight="SemiBold" />
+                            </TextBlock>
+                            <TextBlock Style="{StaticResource FfSubtitle}" Text="Floppy flux needs under 2 Mbit/s. If the worst case is lower, try another USB port or cable." />
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+
+                <Border Style="{StaticResource FfCard}">
+                    <StackPanel>
+                        <TextBlock Text="Head position" Style="{StaticResource FfSectionHeader}" Margin="0,0,0,2" />
+                        <TextBlock Text="Move the heads to a cylinder (useful when checking a drive), or reset the Greaseweazle to its power-on state." Style="{StaticResource FfSubtitle}" />
+                        <WrapPanel Margin="0,10,0,0">
+                            <TextBlock Text="Cylinder" VerticalAlignment="Center" Margin="0,0,8,0" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                            <TextBox Text="{Binding SeekCylinder, UpdateSourceTrigger=PropertyChanged}" Width="70" Margin="0,0,8,0" AutomationProperties.Name="Cylinder (0 to 83)" />
+                            <ui:Button Content="Seek" Icon="{ui:SymbolIcon ArrowBetweenDown24}" Command="{Binding SeekCommand}" Margin="0,0,8,0" />
+                            <ui:Button Content="Reset Greaseweazle" Icon="{ui:SymbolIcon ArrowReset24}" Command="{Binding ResetCommand}" />
+                        </WrapPanel>
+                    </StackPanel>
+                </Border>
+
+                <Border Style="{StaticResource FfCard}">
+                    <StackPanel>
+                        <DockPanel>
+                            <ui:Button DockPanel.Dock="Right" Content="Show" Icon="{ui:SymbolIcon Timer24}" Command="{Binding ShowDelaysCommand}" />
+                            <StackPanel>
+                                <TextBlock Text="Drive timing" Style="{StaticResource FfSectionHeader}" Margin="0,0,0,2" />
+                                <TextBlock Text="The Greaseweazle's drive delay settings. Shown for diagnostics; FluxForge doesn't change them." Style="{StaticResource FfSubtitle}" />
+                            </StackPanel>
+                        </DockPanel>
+                        <ItemsControl ItemsSource="{Binding DelayRows}" Margin="0,8,0,0" Focusable="False">
+                            <ItemsControl.ItemsPanel><ItemsPanelTemplate><UniformGrid Columns="2" /></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate DataType="{x:Type vm:DelayRow}">
+                                    <TextBlock Style="{StaticResource FfBody}" FontSize="12" Margin="0,1">
+                                        <Run Text="{Binding Name, Mode=OneWay}" Foreground="{DynamicResource TextFillColorSecondaryBrush}" /> <Run Text="{Binding Value, Mode=OneWay}" />
+                                    </TextBlock>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </Border>
+
+                <!-- Maintenance: asks first -->
+                <Border Style="{StaticResource FfCard}">
+                    <StackPanel>
+                        <TextBlock Text="Clean the heads" Style="{StaticResource FfSectionHeader}" Margin="0,0,0,2" />
+                        <TextBlock Style="{StaticResource FfSubtitle}"
+                                   Text="Needs a floppy head-cleaning disk. Sweeps the heads across it in a zig-zag. Never use with a normal disk." />
+                        <WrapPanel Margin="0,10,0,0">
+                            <TextBlock Text="Passes" VerticalAlignment="Center" Margin="0,0,8,0" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                            <ComboBox ItemsSource="{Binding PassChoices}" SelectedItem="{Binding CleanPasses}" Width="80" Margin="0,0,8,0" AutomationProperties.Name="Cleaning passes" />
+                            <ui:Button Content="Clean heads…" Icon="{ui:SymbolIcon Broom24}" Command="{Binding CleanCommand}" />
+                        </WrapPanel>
+                    </StackPanel>
+                </Border>
+
+                <Border Style="{StaticResource FfCard}" BorderBrush="{StaticResource FfErrorBrush}">
+                    <StackPanel>
+                        <TextBlock Text="Erase a disk" Style="{StaticResource FfSectionHeader}" Margin="0,0,0,2" />
+                        <TextBlock Style="{StaticResource FfSubtitle}"
+                                   Text="Wipes every track of the disk in the drive, for example before reusing it. This cannot be undone." />
+                        <CheckBox IsChecked="{Binding EraseUnderstood}" Margin="0,10,0,6" AutomationProperties.Name="I understand this permanently erases the disk">
+                            <TextBlock Text="I understand this permanently erases the disk" TextWrapping="Wrap" FontWeight="SemiBold" />
+                        </CheckBox>
+                        <ui:Button Appearance="Danger" Content="Erase disk…" Icon="{ui:SymbolIcon Delete24}" Command="{Binding EraseCommand}" />
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </ScrollViewer>
+
+        <DockPanel Grid.Column="2" Margin="0,0,0,16">
+            <Border DockPanel.Dock="Top" Style="{StaticResource FfCard}" Margin="0,0,18,8">
+                <DockPanel>
+                    <ui:Button DockPanel.Dock="Right" Content="Stop" Icon="{ui:SymbolIcon Stop24}" Command="{Binding CancelCommand}" />
+                    <StackPanel>
+                        <TextBlock FontSize="17" FontWeight="SemiBold" AutomationProperties.LiveSetting="Polite">
+                            <Run Text="{Binding Console.Status, Converter={StaticResource Status}, ConverterParameter=glyph, Mode=OneWay}"
+                                 Foreground="{Binding Console.Status, Converter={StaticResource Status}, ConverterParameter=brush, Mode=OneWay}" />
+                            <Run Text="{Binding Console.Status, Converter={StaticResource Status}, Mode=OneWay}" Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
+                        </TextBlock>
+                        <TextBlock Text="{Binding LastOutcome}" Style="{StaticResource FfBody}" />
+                    </StackPanel>
+                </DockPanel>
+            </Border>
+            <Border Style="{StaticResource FfCard}" Margin="0,0,18,0">
+                <DockPanel>
+                    <TextBlock DockPanel.Dock="Top" Text="Console output (exact gw output, also saved to the job log)" Style="{StaticResource FfSectionHeader}" />
+                    <TextBox Style="{StaticResource FfLogBox}" Text="{Binding Console.LogText, Mode=OneWay}"
+                             AutomationProperties.Name="Console output" TextChanged="ScrollToEnd" />
+                </DockPanel>
+            </Border>
+        </DockPanel>
+    </Grid>
+</UserControl>

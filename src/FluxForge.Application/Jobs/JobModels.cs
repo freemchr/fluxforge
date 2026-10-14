@@ -3,7 +3,7 @@ using FluxForge.Application.Processes;
 
 namespace FluxForge.Application.Jobs;
 
-public enum JobKind { Read, Write, Convert }
+public enum JobKind { Read, Write, Convert, DriveTool }
 
 public enum JobStatus
 {

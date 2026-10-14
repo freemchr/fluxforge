@@ -61,8 +61,6 @@ public sealed partial class ShellViewModel : ObservableObject, INavigator
             "Backend-supported verification and independent readback comparison. Flux byte comparison is never labelled physical verification."),
         [Pages.Library] = new PlaceholderViewModel("Library", "Phase 2 · v1.0",
             "Catalogue disks with hashes, provenance, condition notes, tags and scans. Every job is already recorded under Activity."),
-        [Pages.DriveTools] = new PlaceholderViewModel("Drive Tools", "Phase 2 · v1.0",
-            "Seek, clean, bandwidth, erase and reset utilities with permission gates, plus the firmware assistant. Firmware is never flashed automatically."),
     };
 
     [ObservableProperty]
@@ -80,6 +78,7 @@ public sealed partial class ShellViewModel : ObservableObject, INavigator
             Pages.Read => services.GetRequiredService<ReadDiskViewModel>(),
             Pages.Write => services.GetRequiredService<WriteDiskViewModel>(),
             Pages.ImageStudio => services.GetRequiredService<ImageStudioViewModel>(),
+            Pages.DriveTools => services.GetRequiredService<DriveToolsViewModel>(),
             Pages.Activity => services.GetRequiredService<ActivityViewModel>(),
             Pages.Settings => services.GetRequiredService<SettingsViewModel>(),
             _ => _placeholders[value.Key],

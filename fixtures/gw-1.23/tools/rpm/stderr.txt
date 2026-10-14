@@ -1,0 +1,1 @@
+Rate: 299.642 rpm ; Period: 200.239 ms

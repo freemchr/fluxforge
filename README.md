@@ -30,6 +30,10 @@ and tells you the truth about every disk: what was recovered, what wasn't, and w
 - **Recover without touching the disk again.** Decode any saved raw capture into a sector image with
   a different format in Image Studio. Fragile disks only need to be read once.
 
+## Screenshots
+
+<p align="center"><img src="docs/screenshots/drive-tools.png" alt="FluxForge Drive Tools: drive speed 299.63 RPM, USB bandwidth test and head controls" width="820"></p>
+
 ## Features
 
 ### Read floppy disks (backup and preservation)
@@ -57,6 +61,13 @@ and tells you the truth about every disk: what was recovered, what wasn't, and w
 - **Version management:** a daily update check that always asks first, "skip this version", and
   installing or switching to **older Greaseweazle versions** if you depend on one.
 - Use your own existing `gw.exe` instead, or import a downloaded ZIP offline.
+
+### Drive Tools
+- **Drive speed check** (RPM) with a plain-language health verdict.
+- **USB bandwidth test** between the PC and the Greaseweazle.
+- Seek the heads to any cylinder, reset the board, and view the drive timing settings.
+- **Head cleaning** with a cleaning disk, and **disk erase**, both behind clear confirmations.
+- Every tool run is recorded in Activity.
 
 ### Device and diagnostics
 - Shows host tools, device and firmware as separate statuses (for example "Greaseweazle V4.1 on COM6,

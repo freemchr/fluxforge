@@ -57,6 +57,7 @@ public partial class App
         services.AddSingleton<ReadDiskViewModel>();
         services.AddSingleton<WriteDiskViewModel>();
         services.AddSingleton<ImageStudioViewModel>();
+        services.AddSingleton<DriveToolsViewModel>();
         services.AddSingleton<ActivityViewModel>();
         services.AddSingleton<SettingsViewModel>();
         services.AddSingleton<MainWindow>();
@@ -76,9 +77,15 @@ public partial class App
         base.OnExit(e);
     }
 
+    private static string? _lastError;
+
+    /// <summary>Show an unexpected error once. A failing view can re-throw on every render; don't stack dialogs.</summary>
     private static void OnUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
     {
-        MessageBox.Show(e.Exception.Message, "FluxForge — unexpected error", MessageBoxButton.OK, MessageBoxImage.Error);
         e.Handled = true;
+        if (e.Exception.Message == _lastError) return;
+        _lastError = e.Exception.Message;
+        MessageBox.Show(e.Exception.Message + "\n\nPlease report this via Help & issues.", "FluxForge: unexpected error",
+            MessageBoxButton.OK, MessageBoxImage.Error);
     }
 }
