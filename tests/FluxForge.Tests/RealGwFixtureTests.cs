@@ -225,3 +225,52 @@ public class RealAtariStTests
     public void Suggests_sibling_format_for_extra_sectors(string selected, int highest, string expected) =>
         Assert.Equal(expected, Formats.SuggestForExtraSectors(Formats.Find(selected)!, highest)?.Id);
 }
+
+/// <summary>Real write of a backed-up Amiga disk through FluxForge (verify on), then read back identical.</summary>
+public class RealWriteTests
+{
+    private static readonly DiskProfile Amiga = FormatRegistry.BuiltIn.Single(p => p.Id == "amiga-dd");
+
+    private static TrackProgressTracker Replay(string capture)
+    {
+        var tracker = new TrackProgressTracker();
+        foreach (var line in File.ReadAllLines(Path.Combine(AppContext.BaseDirectory, "fixtures", "gw-1.23", "write-test", capture, "stderr.txt")))
+            tracker.Feed(line);
+        tracker.Finish();
+        return tracker;
+    }
+
+    [Fact]
+    public void Verified_write_marks_every_track_verified()
+    {
+        var t = Replay("write");
+        Assert.True(t.AllTracksVerified);
+        Assert.Equal(160, t.Tracks.Count);
+        Assert.All(t.Tracks, x => Assert.Equal(TrackStatus.Verified, x.Status));
+        var (status, detail) = Application.Jobs.JobRunner.EvaluateWrite(
+            new Application.Processes.ProcessResult(0, [], false, false, TimeSpan.Zero),
+            new WriteRequest(@"C:\backup\before.adf", Amiga, new DeviceTarget(null, "B")), t);
+        Assert.Equal(Application.Jobs.JobStatus.Succeeded, status);
+        Assert.Equal("Write finished and gw verified all 160 tracks.", detail);
+    }
+
+    [Fact]
+    public void Write_without_verify_confirmation_is_not_called_success()
+    {
+        var t = new TrackProgressTracker();
+        t.Feed("T0.0: Writing Track (Flux: 200.0ms period, 219.9 ms total, Terminate at index)");
+        t.Finish();
+        Assert.Equal(TrackStatus.Written, t.Tracks.Single().Status);
+        var (status, _) = Application.Jobs.JobRunner.EvaluateWrite(
+            new Application.Processes.ProcessResult(0, [], false, false, TimeSpan.Zero),
+            new WriteRequest(@"C:\a.adf", Amiga, new DeviceTarget()), t);
+        Assert.Equal(Application.Jobs.JobStatus.CompletedUnverified, status);
+    }
+
+    [Fact]
+    public void Read_back_after_write_is_complete()
+    {
+        var t = Replay("read-after");
+        Assert.Equal(new SectorSummary(1760, 1760), t.Summary);
+    }
+}

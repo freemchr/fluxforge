@@ -27,7 +27,8 @@
                         <TextBlock Text="1 · Image" Style="{StaticResource FfSectionHeader}" />
                         <DockPanel>
                             <ui:Button DockPanel.Dock="Right" Content="Browse…" Command="{Binding BrowseImageCommand}" Margin="8,0,0,0" />
-                            <TextBox Text="{Binding ImagePath, Mode=OneWay}" IsReadOnly="True" AutomationProperties.Name="Image file" />
+                            <ui:TextBox Text="{Binding ImagePath, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="Browse, or paste the path to an image"
+                                        AutomationProperties.Name="Image file" />
                         </DockPanel>
                         <TextBlock Text="{Binding ImageSummary}" Style="{StaticResource FfSubtitle}" Margin="0,6,0,0" />
                     </StackPanel>
@@ -58,8 +59,9 @@
                         <TextBlock Style="{StaticResource FfBody}" Margin="0,0,0,8"
                                    Text="Make sure the floppy in the drive is one you intend to overwrite. FluxForge can't detect write-protect before writing." />
                         <ui:Button Content="Read the target disk first" Icon="{ui:SymbolIcon ArrowDownload24}" Command="{Binding ReadOriginalFirstCommand}" Margin="0,0,0,10" />
-                        <CheckBox IsChecked="{Binding Understood}" FontWeight="SemiBold"
-                                  Content="I understand this will overwrite data on the floppy" AutomationProperties.Name="I understand this will overwrite data on the floppy" />
+                        <CheckBox IsChecked="{Binding Understood}" AutomationProperties.Name="I understand this will overwrite data on the floppy">
+                            <TextBlock Text="I understand this will overwrite data on the floppy" TextWrapping="Wrap" FontWeight="SemiBold" />
+                        </CheckBox>
                     </StackPanel>
                 </Border>
 

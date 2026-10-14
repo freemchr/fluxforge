@@ -25,6 +25,20 @@ public sealed record AppSettings
     public string Drive { get; init; } = "A";
     public string? DefaultOutputFolder { get; init; }
     public string Theme { get; init; } = "Dark";
+
+    /// <summary>Last window bounds in device-independent pixels; null on first run (opens maximized).</summary>
+    public WindowPlacement? Window { get; init; }
+}
+
+public sealed record WindowPlacement(double Left, double Top, double Width, double Height, bool Maximized);
+
+public static class WindowPlacementExtensions
+{
+    /// <summary>True when at least 120×80 DIPs of the title area would be on the given screen area.</summary>
+    public static bool IsVisibleOn(this WindowPlacement p, double screenLeft, double screenTop, double screenWidth, double screenHeight) =>
+        p.Width >= 200 && p.Height >= 150 &&
+        Math.Min(p.Left + p.Width, screenLeft + screenWidth) - Math.Max(p.Left, screenLeft) >= 120 &&
+        Math.Min(p.Top + 80, screenTop + screenHeight) - Math.Max(p.Top, screenTop) >= 40;
 }
 
 public interface ISettingsStore

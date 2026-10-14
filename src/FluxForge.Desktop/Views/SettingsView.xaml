@@ -157,6 +157,18 @@
                     <TextBlock Style="{StaticResource FfBody}" Text="{Binding AppVersion, StringFormat='FluxForge {0} — preview build'}" />
                     <TextBlock Style="{StaticResource FfSubtitle}" Margin="0,4,0,8"
                                Text="FluxForge is an independent frontend and is not an official Greaseweazle product. Greaseweazle is created by Keir Fraser." />
+                    <TextBlock Text="Support" Style="{StaticResource FfLabel}" />
+                    <WrapPanel Margin="0,0,0,8">
+                        <ui:Button Appearance="Primary" Icon="{ui:SymbolIcon Bug24}" Content="Report an issue" Command="{Binding OpenLinkCommand}"
+                                   CommandParameter="https://github.com/freemchr/fluxforge/issues/new" Margin="0,0,8,0" />
+                        <ui:Button Icon="{ui:SymbolIcon ChatHelp24}" Content="Known issues &amp; help" Command="{Binding OpenLinkCommand}"
+                                   CommandParameter="https://github.com/freemchr/fluxforge/issues" Margin="0,0,8,0" />
+                        <ui:Button Appearance="Transparent" Content="FluxForge on GitHub" Command="{Binding OpenLinkCommand}"
+                                   CommandParameter="https://github.com/freemchr/fluxforge" />
+                    </WrapPanel>
+                    <TextBlock Style="{StaticResource FfSubtitle}" FontSize="12" Margin="0,0,0,8"
+                               Text="When reporting a problem, attach the job report from Activity → Export report (tick “Redact folder paths” if you prefer)." />
+                    <TextBlock Text="Greaseweazle" Style="{StaticResource FfLabel}" />
                     <WrapPanel>
                         <ui:Button Appearance="Transparent" Content="Greaseweazle on GitHub" Command="{Binding OpenLinkCommand}"
                                    CommandParameter="https://github.com/keirf/greaseweazle" Margin="0,0,8,0" />

@@ -88,6 +88,9 @@ public sealed class TrackProgressTracker
     /// </summary>
     public int UnexpectedSectors => _tracks.Values.Sum(t => t.UnexpectedSectors);
 
+    /// <summary>gw 1.23 prints "All tracks verified" after a write whose verify pass succeeded.</summary>
+    public bool AllTracksVerified { get; private set; }
+
     /// <summary>Highest sector number seen outside the format (R value), or 0.</summary>
     public int HighestUnexpectedSector { get; private set; }
 
@@ -108,6 +111,12 @@ public sealed class TrackProgressTracker
                                    line.StartsWith("** FATAL ERROR", StringComparison.Ordinal)))
         {
             FatalError = line.TrimStart('*', ' ');
+            return null;
+        }
+
+        if (line.Equals("All tracks verified", StringComparison.OrdinalIgnoreCase))
+        {
+            AllTracksVerified = true;
             return null;
         }
 
@@ -157,6 +166,11 @@ public sealed class TrackProgressTracker
                 : TrackStatus.Unreadable;
             next = new TrackObservation(key.Item1, key.Item2, status, found, total, retries, ParseConfidence.High, log, prev?.UnexpectedSectors ?? 0);
         }
+        else if (rest.StartsWith("Writing Track", StringComparison.OrdinalIgnoreCase))
+        {
+            // gw 1.23: "T0.0: Writing Track (Flux: 200.0ms period, 219.9 ms total, Terminate at index)"
+            next = new TrackObservation(key.Item1, key.Item2, TrackStatus.Written, null, null, retries, ParseConfidence.High, log, prev?.UnexpectedSectors ?? 0);
+        }
         else if (rest.StartsWith("Giving up", StringComparison.OrdinalIgnoreCase))
         {
             // gw 1.23: "T0.0: Giving up: 1 sectors missing" after the last retry.
@@ -190,6 +204,8 @@ public sealed class TrackProgressTracker
         {
             if (t.Status == TrackStatus.Reading && t.SectorsTotal is { } total && t.SectorsFound < total)
                 _tracks[key] = t with { Status = TrackStatus.Unreadable };
+            else if (t.Status == TrackStatus.Written && AllTracksVerified && FatalError is null)
+                _tracks[key] = t with { Status = TrackStatus.Verified };
         }
     }
 

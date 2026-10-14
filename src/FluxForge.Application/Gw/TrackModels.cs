@@ -10,6 +10,12 @@ public enum TrackStatus
     Unreadable,
     FluxCapturedDecodeUnknown,
     NotApplicable,
+    /// <summary>Write in progress on this track.</summary>
+    Writing,
+    /// <summary>gw reported the track written; verification not (yet) confirmed.</summary>
+    Written,
+    /// <summary>Written and confirmed by gw's verify pass.</summary>
+    Verified,
 }
 
 /// <summary>How sure the parser is that it understood the tool's output for this track.</summary>

@@ -36,7 +36,7 @@ public sealed partial class WriteDiskViewModel : ObservableObject, IPageLifecycl
 
     public AppState State { get; }
     public IReadOnlyList<string> Drives { get; } = ["A", "B", "0", "1", "2", "3"];
-    public TrackMapViewModel TrackMap { get; } = new();
+    public TrackMapViewModel TrackMap { get; } = new() { IsWrite = true };
     public JobConsoleViewModel Console { get; } = new();
 
     [ObservableProperty] public partial string? ImagePath { get; set; }
@@ -52,13 +52,25 @@ public sealed partial class WriteDiskViewModel : ObservableObject, IPageLifecycl
     [ObservableProperty] public partial JobRecord? LastResult { get; set; }
     [ObservableProperty] public partial string? ImageSummary { get; set; }
 
-    public bool IsRawImage => ImagePath is not null && GwCommands.RawFluxExtensions.Contains(Path.GetExtension(ImagePath));
+    /// <summary>The typed/browsed path, normalised, or null if it isn't an existing file.</summary>
+    public string? ImageFile =>
+        ImagePath?.Trim().Trim('"') is { Length: > 0 } p && Path.IsPathFullyQualified(p) && File.Exists(p) ? p : null;
+
+    public bool IsRawImage => ImageFile is { } f && GwCommands.RawFluxExtensions.Contains(Path.GetExtension(f));
 
     partial void OnImagePathChanged(string? value)
     {
         Understood = false;
         LastResult = null;
-        if (value is null) { ProfileChoices = []; SelectedProfile = null; ImageSummary = null; Refresh(); return; }
+        value = value?.Trim().Trim('"');
+        if (string.IsNullOrEmpty(value) || !Path.IsPathFullyQualified(value) || !File.Exists(value))
+        {
+            ProfileChoices = [];
+            SelectedProfile = null;
+            ImageSummary = string.IsNullOrEmpty(value) ? null : "File not found.";
+            Refresh();
+            return;
+        }
 
         var ext = Path.GetExtension(value);
         var size = File.Exists(value) ? new FileInfo(value).Length : 0;
@@ -95,20 +107,20 @@ public sealed partial class WriteDiskViewModel : ObservableObject, IPageLifecycl
 
     public void OnNavigatedTo() => Refresh();
 
-    private WriteRequest? BuildRequest() => ImagePath is null ? null
-        : new WriteRequest(ImagePath, SelectedProfile?.Profile, new DeviceTarget(_settings.Load().DevicePort, Drive), Verify);
+    private WriteRequest? BuildRequest() => ImageFile is not { } file ? null
+        : new WriteRequest(file, SelectedProfile?.Profile, new DeviceTarget(_settings.Load().DevicePort, Drive), Verify);
 
     private void Refresh()
     {
         OnPropertyChanged(nameof(IsRawImage));
         var issues = new List<SafetyIssue>();
         CommandPreview = "";
-        if (ImagePath is not null)
+        if (ImageFile is { } imageFile)
         {
             if (!IsRawImage && SelectedProfile is null)
                 issues.Add(new SafetyIssue(true, "Choose the disk format. FluxForge won't guess from the file extension."));
             else
-                issues.AddRange(OutputGuard.CheckWriteImage(ImagePath, SelectedProfile?.Profile));
+                issues.AddRange(OutputGuard.CheckWriteImage(imageFile, SelectedProfile?.Profile));
             try
             {
                 if (BuildRequest() is { } req && (IsRawImage || SelectedProfile is not null))
@@ -120,7 +132,7 @@ public sealed partial class WriteDiskViewModel : ObservableObject, IPageLifecycl
 
         BlockedReason =
             IsRunning ? null :
-            ImagePath is null ? "Choose an image to write." :
+            ImageFile is null ? "Choose an image to write." :
             !State.ToolsReady ? "Install the Greaseweazle host tools first (Home)." :
             !State.DeviceReady ? "Connect a Greaseweazle — " + State.Device.Message :
             issues.FirstOrDefault(i => i.Blocking)?.Message ??
@@ -155,16 +167,24 @@ public sealed partial class WriteDiskViewModel : ObservableObject, IPageLifecycl
         _settings.Save(_settings.Load() with { Drive = Drive });
         _cts = new CancellationTokenSource();
         IsRunning = true;
+        var p0 = SelectedProfile?.Profile;
+        TrackMap.Reset(p0?.Cylinders ?? 84, p0?.Heads ?? 2);
+        TrackMap.Start();
         Console.Start(CommandPreview);
         State.BeginJob();
         var progress = new Progress<JobProgress>(p =>
         {
             if (p.Line is { } line) Console.Append(line);
-            if (p.Track is { } track) Console.CurrentTrack = $"Cylinder {track.Cylinder}, side {track.Head}";
+            if (p.Track is { } track)
+            {
+                TrackMap.Advance(track);
+                Console.CurrentTrack = $"Wrote cylinder {track.Cylinder}, side {track.Head}";
+            }
         });
         try
         {
             LastResult = await Task.Run(() => _jobs.RunWriteAsync(new WriteJob(tools, request, State.Device.Info), progress, _cts.Token));
+            TrackMap.Stop();
             Console.Stop(LastResult.Status);
             TrackMap.Load(LastResult.Tracks);
         }
@@ -175,6 +195,7 @@ public sealed partial class WriteDiskViewModel : ObservableObject, IPageLifecycl
         }
         finally
         {
+            TrackMap.Stop();
             IsRunning = false;
             Understood = false; // every write needs a fresh acknowledgement
             _cts.Dispose();

@@ -229,7 +229,12 @@ public sealed class JobRunner(IProcessRunner runner, IJobStore store, TimeProvid
             return (JobStatus.CompletedUnverified, "Write finished. Verification was turned off, so the disk was not checked.");
         if (raw)
             return (JobStatus.CompletedUnverified, "Write finished. Raw flux writes are not verified like sector images; use a readback comparison.");
-        return (JobStatus.Succeeded, "Write finished and gw's built-in verification reported no errors.");
+        if (tracker is { AllTracksVerified: false })
+            return (JobStatus.CompletedUnverified, "Write finished, but gw did not confirm that its verification passed. Read the disk back to check it.");
+        var count = tracker?.Tracks.Count(t => t.Status == TrackStatus.Verified) ?? 0;
+        return (JobStatus.Succeeded, count > 0
+            ? $"Write finished and gw verified all {count} tracks."
+            : "Write finished and gw's built-in verification reported no errors.");
     }
 
     // gw writes all of its output (progress included) to stderr, so stream alone doesn't mark an error.

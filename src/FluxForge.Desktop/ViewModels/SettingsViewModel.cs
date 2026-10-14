@@ -172,10 +172,8 @@ public sealed partial class SettingsViewModel(
     private void OpenDataFolder() =>
         Process.Start(new ProcessStartInfo("explorer.exe") { ArgumentList = { paths.Root }, UseShellExecute = false });
 
+    public string RepositoryUrl => AppLinks.Repository;
+
     [RelayCommand]
-    private static void OpenLink(string url)
-    {
-        if (Uri.TryCreate(url, UriKind.Absolute, out var uri) && uri.Scheme == Uri.UriSchemeHttps)
-            Process.Start(new ProcessStartInfo(uri.ToString()) { UseShellExecute = true });
-    }
+    private static void OpenLink(string url) => AppLinks.Open(url);
 }

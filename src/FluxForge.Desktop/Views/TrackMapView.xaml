@@ -9,14 +9,14 @@
              mc:Ignorable="d"
              d:DataContext="{d:DesignInstance vm:TrackMapViewModel}">
     <StackPanel>
-        <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
+        <!-- Sides wrap below each other on narrow windows instead of scrolling (a scrollbar hid the last row). -->
             <ItemsControl ItemsSource="{Binding Sides}" Focusable="False">
                 <ItemsControl.ItemsPanel>
-                    <ItemsPanelTemplate><StackPanel Orientation="Horizontal" /></ItemsPanelTemplate>
+                    <ItemsPanelTemplate><WrapPanel Orientation="Horizontal" /></ItemsPanelTemplate>
                 </ItemsControl.ItemsPanel>
                 <ItemsControl.ItemTemplate>
                     <DataTemplate DataType="{x:Type vm:TrackSideViewModel}">
-                        <StackPanel Margin="0,0,28,0">
+                        <StackPanel Margin="0,0,28,10">
                             <TextBlock Text="{Binding Title}" Style="{StaticResource FfLabel}" Margin="24,0,0,6" />
                             <Grid>
                                 <Grid.ColumnDefinitions>
@@ -38,9 +38,33 @@
                                     </ItemsControl.ItemsPanel>
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate DataType="{x:Type vm:TrackCellViewModel}">
-                                            <Button Style="{StaticResource FfTrackCell}" Content="{Binding Glyph}" Background="{Binding Brush}"
-                                                    Command="{Binding SelectCommand}" ToolTip="{Binding ToolTip}"
-                                                    AutomationProperties.Name="{Binding AccessibleName}" />
+                                            <Grid>
+                                                <Button Style="{StaticResource FfTrackCell}" Content="{Binding Glyph}" Background="{Binding Brush}"
+                                                        Command="{Binding SelectCommand}" ToolTip="{Binding ToolTip}"
+                                                        AutomationProperties.Name="{Binding AccessibleName}" />
+                                                <!-- Pulsing ring on the track the drive is working on right now -->
+                                                <Border IsHitTestVisible="False" Margin="-1" CornerRadius="4" BorderThickness="2"
+                                                        BorderBrush="{DynamicResource TextFillColorPrimaryBrush}" Opacity="0">
+                                                    <Border.Style>
+                                                        <Style TargetType="Border">
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding IsCurrent}" Value="True">
+                                                                    <DataTrigger.EnterActions>
+                                                                        <BeginStoryboard x:Name="Pulse">
+                                                                            <Storyboard RepeatBehavior="Forever" AutoReverse="True">
+                                                                                <DoubleAnimation Storyboard.TargetProperty="Opacity" From="0.15" To="1" Duration="0:0:0.4" />
+                                                                            </Storyboard>
+                                                                        </BeginStoryboard>
+                                                                    </DataTrigger.EnterActions>
+                                                                    <DataTrigger.ExitActions>
+                                                                        <StopStoryboard BeginStoryboardName="Pulse" />
+                                                                    </DataTrigger.ExitActions>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </Border.Style>
+                                                </Border>
+                                            </Grid>
                                         </DataTemplate>
                                     </ItemsControl.ItemTemplate>
                                 </ItemsControl>
@@ -49,9 +73,8 @@
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
-        </ScrollViewer>
 
-        <ItemsControl ItemsSource="{x:Static vm:TrackMapViewModel.Legend}" Margin="24,10,0,0" Focusable="False">
+        <ItemsControl ItemsSource="{Binding Legend}" Margin="24,10,0,0" Focusable="False">
             <ItemsControl.ItemsPanel>
                 <ItemsPanelTemplate><WrapPanel /></ItemsPanelTemplate>
             </ItemsControl.ItemsPanel>

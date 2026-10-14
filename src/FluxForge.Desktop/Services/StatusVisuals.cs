@@ -23,6 +23,9 @@ public static class StatusVisuals
         TrackStatus.Unreadable => new("Unreadable / missing sectors", "✕", "FfErrorBrush"),
         TrackStatus.FluxCapturedDecodeUnknown => new("Flux captured, decode unknown", "~", "FfInfoBrush"),
         TrackStatus.NotApplicable => new("Not applicable", "–", "FfNeutralBrush"),
+        TrackStatus.Writing => new("Writing", "…", "FfAccentBrush"),
+        TrackStatus.Written => new("Written, not yet verified", "W", "FfInfoBrush"),
+        TrackStatus.Verified => new("Written and verified", "✓", "FfSuccessBrush"),
 
         JobStatus.Pending => new("Pending", "•", "FfNeutralBrush"),
         JobStatus.Running => new("Running", "…", "FfAccentBrush"),

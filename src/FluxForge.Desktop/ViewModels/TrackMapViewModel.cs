@@ -12,10 +12,19 @@ public sealed partial class TrackCellViewModel(int cylinder, int head, Action<Tr
     public int Head { get; } = head;
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(Glyph), nameof(Brush), nameof(AccessibleName), nameof(ToolTip))]
+    [NotifyPropertyChangedFor(nameof(Status), nameof(Glyph), nameof(Brush), nameof(AccessibleName), nameof(ToolTip))]
     public partial TrackObservation? Observation { get; set; }
 
-    public TrackStatus Status => Observation?.Status ?? TrackStatus.NotRead;
+    /// <summary>Shown while the drive is on this track (before gw reports it); drives the pulse animation.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(Status), nameof(Glyph), nameof(Brush), nameof(AccessibleName), nameof(ToolTip))]
+    public partial TrackStatus? InProgress { get; set; }
+
+    public bool IsCurrent => InProgress is not null;
+
+    partial void OnInProgressChanged(TrackStatus? value) => OnPropertyChanged(nameof(IsCurrent));
+
+    public TrackStatus Status => InProgress ?? Observation?.Status ?? TrackStatus.NotRead;
     public string Glyph => StatusVisuals.For(Status).Glyph;
     public System.Windows.Media.Brush Brush => StatusVisuals.For(Status).Brush;
     public string AccessibleName => $"Cylinder {Cylinder}, side {Head}: {StatusVisuals.For(Status).Label}";
@@ -52,11 +61,50 @@ public sealed partial class TrackMapViewModel : ObservableObject
     [ObservableProperty]
     public partial TrackCellViewModel? Selected { get; set; }
 
-    public static IReadOnlyList<StatusVisual> Legend { get; } =
-        [.. Enum.GetValues<TrackStatus>().Select(s => StatusVisuals.For(s))];
+    private static readonly TrackStatus[] ReadLegend =
+        [TrackStatus.NotRead, TrackStatus.Reading, TrackStatus.DecodedOk, TrackStatus.RecoveredAfterRetry, TrackStatus.Unreadable, TrackStatus.FluxCapturedDecodeUnknown];
+    private static readonly TrackStatus[] WriteLegend =
+        [TrackStatus.NotRead, TrackStatus.Writing, TrackStatus.Written, TrackStatus.Verified];
+
+    private TrackCellViewModel? _current;
+
+    /// <summary>Write maps show the write legend; everything else the read legend.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(Legend))]
+    public partial bool IsWrite { get; set; }
+
+    public IReadOnlyList<StatusVisual> Legend =>
+        [.. (IsWrite ? WriteLegend : ReadLegend).Select(s => StatusVisuals.For(s))];
+
+    /// <summary>
+    /// Live progress: record the finished track, then pulse the track gw will do next. gw works
+    /// cylinder by cylinder, side 0 then side 1, so the next track is predictable.
+    /// </summary>
+    public void Advance(TrackObservation done)
+    {
+        Update(done);
+        SetCurrent(null);
+        var heads = Sides.Count;
+        var (c, h) = done.Head + 1 < heads ? (done.Cylinder, done.Head + 1) : (done.Cylinder + 1, 0);
+        if (_cells.TryGetValue((c, h), out var next) && next.Observation is null)
+            SetCurrent(next);
+    }
+
+    /// <summary>Pulse the first track while gw seeks and spins up.</summary>
+    public void Start() => SetCurrent(_cells.TryGetValue((0, 0), out var first) ? first : null);
+
+    public void Stop() => SetCurrent(null);
+
+    private void SetCurrent(TrackCellViewModel? cell)
+    {
+        if (_current is not null) _current.InProgress = null;
+        _current = cell;
+        if (cell is not null) cell.InProgress = IsWrite ? TrackStatus.Writing : TrackStatus.Reading;
+    }
 
     public void Reset(int cylinders, int heads)
     {
+        _current = null;
         _cells.Clear();
         Sides.Clear();
         Selected = null;

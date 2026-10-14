@@ -58,6 +58,11 @@ public sealed partial class ShellViewModel(IServiceProvider services, AppState s
         if (CurrentPage is IPageLifecycle page) page.OnNavigatedTo();
     }
 
+    public string SupportUrl => AppLinks.Issues;
+
+    [RelayCommand]
+    private static void OpenSupport() => AppLinks.Open(AppLinks.Issues);
+
     [RelayCommand]
     public void Navigate(string page) => Selected = Items.First(i => i.Key == page);
 

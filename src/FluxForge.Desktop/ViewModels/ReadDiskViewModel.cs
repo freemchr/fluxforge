@@ -162,6 +162,7 @@ public sealed partial class ReadDiskViewModel : ObservableObject, IPageLifecycle
         IsRunning = true;
         LastResult = null;
         ResetMap();
+        TrackMap.Start();
         Console.Start(preview);
         State.BeginJob();
         var progress = new Progress<JobProgress>(p =>
@@ -169,7 +170,7 @@ public sealed partial class ReadDiskViewModel : ObservableObject, IPageLifecycle
             if (p.Line is { } line) Console.Append(line);
             if (p.Track is { } track)
             {
-                TrackMap.Update(track);
+                TrackMap.Advance(track);
                 Console.CurrentTrack = $"Cylinder {track.Cylinder}, side {track.Head}";
             }
         });
@@ -177,6 +178,7 @@ public sealed partial class ReadDiskViewModel : ObservableObject, IPageLifecycle
         try
         {
             LastResult = await Task.Run(() => _jobs.RunReadAsync(new ReadJob(tools, request, State.Device.Info, NullIfEmpty(DiskLabel), NullIfEmpty(Notes)), progress, _cts.Token));
+            TrackMap.Stop();
             Console.Stop(LastResult.Status);
             TrackMap.Load(LastResult.Tracks);
         }
@@ -187,6 +189,7 @@ public sealed partial class ReadDiskViewModel : ObservableObject, IPageLifecycle
         }
         finally
         {
+            TrackMap.Stop();
             IsRunning = false;
             _cts.Dispose();
             _cts = null;

@@ -1,0 +1,6 @@
+{
+  "args": ["write", "--format=amiga.amigados", "--drive=B", "<backup>\\before.adf"],
+  "exitCode": 0,
+  "seconds": 98,
+  "note": "Real write via FluxForge Write screen; gw verify on (default)."
+}

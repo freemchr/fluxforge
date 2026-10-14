@@ -35,6 +35,7 @@ public sealed partial class ActivityViewModel(IJobStore store, IDialogService di
         if (value is null) return;
         var heads = value.Tracks.Count == 0 ? 2 : value.Tracks.Max(t => t.Head) + 1;
         var cyls = value.Tracks.Count == 0 ? 80 : value.Tracks.Max(t => t.Cylinder) + 1;
+        TrackMap.IsWrite = value.Kind == JobKind.Write;
         TrackMap.Reset(cyls, heads);
         TrackMap.Load(value.Tracks);
     }

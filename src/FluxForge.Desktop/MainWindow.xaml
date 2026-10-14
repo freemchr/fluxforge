@@ -96,13 +96,19 @@
             </Grid.ColumnDefinitions>
 
             <DockPanel Grid.Column="0" Margin="8,8,4,8">
-                <StackPanel DockPanel.Dock="Top" Margin="0,2,0,14" AutomationProperties.Name="FluxForge">
-                    <Image Source="{StaticResource FfIcon}" Width="102" Height="102" RenderOptions.BitmapScalingMode="HighQuality" />
-                    <Image Source="{StaticResource FfWordmark}" Width="172" Margin="0,4,0,0" RenderOptions.BitmapScalingMode="HighQuality" />
+                <!-- Brand block, centred across the full sidebar width (the panel's outer margin is asymmetric). -->
+                <StackPanel DockPanel.Dock="Top" Margin="-8,2,-4,14" HorizontalAlignment="Stretch" AutomationProperties.Name="FluxForge">
+                    <Image Source="{StaticResource FfIcon}" Width="102" Height="102" HorizontalAlignment="Center" RenderOptions.BitmapScalingMode="HighQuality" />
+                    <Image Source="{StaticResource FfWordmark}" Width="168" Margin="0,4,0,0" HorizontalAlignment="Center" RenderOptions.BitmapScalingMode="HighQuality" />
                 </StackPanel>
-                <TextBlock DockPanel.Dock="Bottom" Margin="12,8" FontSize="11" TextWrapping="Wrap"
-                           Foreground="{DynamicResource TextFillColorTertiaryBrush}"
-                           Text="Independent frontend for the official Greaseweazle host tools." />
+                <StackPanel DockPanel.Dock="Bottom" Margin="4,8,4,4">
+                    <ui:Button Appearance="Transparent" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left"
+                               Icon="{ui:SymbolIcon ChatHelp24}" Content="Help &amp; issues"
+                               Command="{Binding OpenSupportCommand}" ToolTip="{Binding SupportUrl}" />
+                    <TextBlock Margin="8,6,8,0" FontSize="11" TextWrapping="Wrap"
+                               Foreground="{DynamicResource TextFillColorTertiaryBrush}"
+                               Text="Independent frontend for the official Greaseweazle host tools." />
+                </StackPanel>
                 <ListBox ItemsSource="{Binding Items}" SelectedItem="{Binding Selected}"
                          ItemContainerStyle="{StaticResource FfNavItem}"
                          Background="Transparent" BorderThickness="0"

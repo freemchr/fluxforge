@@ -123,18 +123,21 @@ int Write()
     if (positional.Count != 1 || !File.Exists(positional[0])) { Console.Error.WriteLine("** FATAL ERROR: image not found"); return 1; }
     options.TryGetValue("--format", out var format);
     var (cyls, heads, _, _) = Geometry(format) ?? (84, 2, 0, "Raw Flux");
+    if (format is not null) Console.WriteLine($"Format {format}");
     Console.WriteLine($"[{Marker}] Writing c=0-{cyls - 1}:h=0-{heads - 1}");
     for (var c = 0; c < cyls; c++)
     for (var h = 0; h < heads; h++)
     {
         Thread.Sleep(delay);
-        Console.WriteLine($"T{c}.{h}: Writing Track");
+        // Matches gw 1.23's per-track write line.
+        Console.WriteLine($"T{c}.{h}: Writing Track (Flux: 200.0ms period, 219.9 ms total, Terminate at index)");
         if (scenario == "fail" && c == 30)
         {
             Console.Error.WriteLine("** FATAL ERROR: Verify Failure: T30.0");
             return 1;
         }
     }
+    if (!options.ContainsKey("--no-verify")) Console.WriteLine("All tracks verified");
     return 0;
 }
 
