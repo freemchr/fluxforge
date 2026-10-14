@@ -4,8 +4,12 @@ Status as of 14 Oct 2026 (Verify, Library and Firmware assistant finished; v1.0.
 
 ## Agreed direction
 
-v1.0.0 (Verify, Library, per-feature README screenshots) is the current release, chosen by the user on
-14 Oct 2026. v0.1.0 stays up because a Reddit post links to it; 0.1.0 installs update in-app.
+v1.0.0 (Verify, Library, Firmware assistant) is released and live on GitHub (pushed and tagged
+14 Oct 2026, release notes written, README has a screenshot per feature plus a gallery and 1.0 FAQ).
+v0.1.0 stays up because a Reddit post links to it; 0.1.0 installs update in-app.
+
+Open decisions for the user: code signing (needs their own certificate or Azure Trusted Signing;
+SmartScreen warns until then), and whether to keep the logo-blue accent (`#0A84FF`) or go back to teal.
 
 ## Done and tested on real hardware
 
@@ -29,6 +33,7 @@ path was exercised against FakeGw (`FLUXFORGE_FAKEGW_FIRMWARE=1.5`). A real flas
 1. Next: batch imaging, more formats (Apple II, Acorn, MSX, Amiga HD), PC/C64 real-disk tests, light
    theme visual pass, Activity export click-through, run `Setup.exe` and test self-update for real.
    Library ideas not built yet: move an image to another disk / merge disks, scans/photos of labels.
+   Test a real firmware flash once a firmware newer than 1.6 is published (ask the user first).
 2. Release: bump `<Version>` in `Directory.Build.props`, then tag `vX.Y.Z` (the release workflow
    builds, packages and publishes). Code signing is still to do.
 
