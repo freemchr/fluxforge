@@ -159,3 +159,69 @@ public class RealAmigaReadTests
         Assert.Equal(Application.Jobs.JobStatus.Failed, writeStatus);
     }
 }
+
+/// <summary>
+/// Real Atari ST disk formatted with 10 sectors/track (800K), first read as standard 720K.
+/// gw decodes all 1,440 "expected" sectors and silently ignores sector 10 on every track.
+/// </summary>
+public class RealAtariStTests
+{
+    private static readonly FormatRegistry Formats = new();
+    private static readonly DiskProfile St720 = Formats.Find("atarist-720")!;
+    private static readonly DiskProfile St800 = Formats.Find("atarist-800")!;
+    private static Application.Processes.ProcessResult Exit0 => new(0, [], false, false, TimeSpan.Zero);
+
+    private static TrackProgressTracker Replay(string capture)
+    {
+        var tracker = new TrackProgressTracker();
+        foreach (var line in File.ReadAllLines(Path.Combine(AppContext.BaseDirectory, "fixtures", "gw-1.23", "atarist-struggling", capture, "stderr.txt")))
+            tracker.Feed(line);
+        tracker.Finish();
+        return tracker;
+    }
+
+    [Fact]
+    public void Extra_sectors_are_counted_once_per_track()
+    {
+        var t = Replay("read-raw-format");
+        Assert.Equal(new SectorSummary(1440, 1440), t.Summary);
+        Assert.Equal(160, t.UnexpectedSectors);
+        Assert.Equal(10, t.HighestUnexpectedSector);
+        Assert.All(t.Tracks, x => Assert.Equal(TrackStatus.DecodedOk, x.Status));
+    }
+
+    [Fact]
+    public void Sector_image_with_extra_sectors_is_never_reported_as_success()
+    {
+        var (status, detail) = Application.Jobs.JobRunner.EvaluateRead(Exit0, Replay("read-raw-format"), CaptureMode.SectorImage, St720, outputExists: true);
+        Assert.Equal(Application.Jobs.JobStatus.Partial, status);
+        Assert.Contains("160 sector(s) on 160 track(s)", detail);
+        Assert.Contains("atarist.800", detail);
+        Assert.Contains("NOT in this image", detail);
+    }
+
+    [Fact]
+    public void Raw_capture_with_extra_sectors_points_to_offline_decode()
+    {
+        var (status, detail) = Application.Jobs.JobRunner.EvaluateRead(Exit0, Replay("read-raw-format"), CaptureMode.Preservation, St720, outputExists: true);
+        Assert.Equal(Application.Jobs.JobStatus.CompletedUnverified, status);
+        Assert.Contains("raw capture includes them", detail);
+    }
+
+    [Fact]
+    public void Decoding_the_raw_capture_as_800k_recovers_every_sector()
+    {
+        var t = Replay("convert-800");
+        Assert.Equal(new SectorSummary(1600, 1600), t.Summary);
+        Assert.Equal(0, t.UnexpectedSectors);
+        var (status, _) = Application.Jobs.JobRunner.EvaluateRead(Exit0, t, CaptureMode.SectorImage, St800, outputExists: true);
+        Assert.Equal(Application.Jobs.JobStatus.Succeeded, status);
+    }
+
+    [Theory]
+    [InlineData("atarist-720", 10, "atarist-800")]
+    [InlineData("atarist-720", 11, "atarist-880")]
+    [InlineData("atarist-800", 11, "atarist-880")]
+    public void Suggests_sibling_format_for_extra_sectors(string selected, int highest, string expected) =>
+        Assert.Equal(expected, Formats.SuggestForExtraSectors(Formats.Find(selected)!, highest)?.Id);
+}

@@ -189,6 +189,20 @@ public sealed class JobRunner(IProcessRunner runner, IJobStore store, TimeProvid
 
         if (profile is null)
             return (JobStatus.CompletedUnverified, prefix + "No disk format was selected, so sectors were not decoded.");
+
+        if (tracker.UnexpectedSectors > 0)
+        {
+            // The disk holds sectors the chosen format doesn't define. Never report this as success:
+            // a sector image silently lacks them, and the decode check doesn't describe the real disk.
+            var tracks = tracker.Tracks.Count(t => t.UnexpectedSectors > 0);
+            var suggestion = new FormatRegistry().SuggestForExtraSectors(profile, tracker.HighestUnexpectedSector) is { } better
+                ? $" This looks like {better.System} {better.DisplayName} ({better.GwFormat})."
+                : "";
+            var what = $"The disk has {tracker.UnexpectedSectors:N0} sector(s) on {tracks} track(s) beyond what {profile.GwFormat} defines (up to sector {tracker.HighestUnexpectedSector}).{suggestion}";
+            return mode == CaptureMode.Preservation
+                ? (JobStatus.CompletedUnverified, $"{prefix}{what} The raw capture includes them — decode it with the right format instead of reading the disk again.")
+                : (JobStatus.Partial, $"{what} They are NOT in this image. Read again with the matching format, or make a raw capture.");
+        }
         if (unreadable > 0 || tracker.Summary is { Complete: false })
         {
             var sectors = tracker.Summary is { } s ? $" {s.Found:N0} of {s.Total:N0} sectors decoded." : "";

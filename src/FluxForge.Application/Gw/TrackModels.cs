@@ -23,7 +23,8 @@ public sealed record TrackObservation(
     int? SectorsTotal,
     int Retries,
     ParseConfidence Confidence,
-    IReadOnlyList<string> LogLines);
+    IReadOnlyList<string> LogLines,
+    int UnexpectedSectors = 0);
 
 public sealed record SectorSummary(int Found, int Total)
 {

@@ -1,0 +1,345 @@
+Reading c=0-79:h=0-1 revs=2
+Format atarist.720
+T0.0: Ignoring unexpected sector C:0 H:0 R:10 N:2
+T0.0: IBM MFM (9/9 sectors) from Raw Flux (86650 flux in 401.05ms)
+T0.1: Ignoring unexpected sector C:0 H:1 R:10 N:2
+T0.1: IBM MFM (9/9 sectors) from Raw Flux (91587 flux in 400.95ms)
+T1.0: Ignoring unexpected sector C:1 H:0 R:10 N:2
+T1.0: IBM MFM (9/9 sectors) from Raw Flux (81638 flux in 400.95ms)
+T1.1: Ignoring unexpected sector C:1 H:1 R:10 N:2
+T1.1: IBM MFM (9/9 sectors) from Raw Flux (76663 flux in 400.91ms)
+T2.0: Ignoring unexpected sector C:2 H:0 R:10 N:2
+T2.0: IBM MFM (9/9 sectors) from Raw Flux (77134 flux in 400.90ms)
+T2.1: Ignoring unexpected sector C:2 H:1 R:10 N:2
+T2.1: IBM MFM (9/9 sectors) from Raw Flux (76318 flux in 400.87ms)
+T3.0: Ignoring unexpected sector C:3 H:0 R:10 N:2
+T3.0: IBM MFM (9/9 sectors) from Raw Flux (77385 flux in 400.86ms)
+T3.1: Ignoring unexpected sector C:3 H:1 R:10 N:2
+T3.1: IBM MFM (9/9 sectors) from Raw Flux (78443 flux in 400.85ms)
+T4.0: Ignoring unexpected sector C:4 H:0 R:10 N:2
+T4.0: IBM MFM (9/9 sectors) from Raw Flux (78414 flux in 400.85ms)
+T4.1: Ignoring unexpected sector C:4 H:1 R:10 N:2
+T4.1: IBM MFM (9/9 sectors) from Raw Flux (77123 flux in 400.83ms)
+T5.0: Ignoring unexpected sector C:5 H:0 R:10 N:2
+T5.0: IBM MFM (9/9 sectors) from Raw Flux (77920 flux in 400.84ms)
+T5.1: Ignoring unexpected sector C:5 H:1 R:10 N:2
+T5.1: IBM MFM (9/9 sectors) from Raw Flux (77722 flux in 400.81ms)
+T6.0: Ignoring unexpected sector C:6 H:0 R:10 N:2
+T6.0: IBM MFM (9/9 sectors) from Raw Flux (78048 flux in 400.82ms)
+T6.1: Ignoring unexpected sector C:6 H:1 R:10 N:2
+T6.1: IBM MFM (9/9 sectors) from Raw Flux (77903 flux in 400.81ms)
+T7.0: Ignoring unexpected sector C:7 H:0 R:10 N:2
+T7.0: IBM MFM (9/9 sectors) from Raw Flux (77455 flux in 400.81ms)
+T7.1: Ignoring unexpected sector C:7 H:1 R:10 N:2
+T7.1: IBM MFM (9/9 sectors) from Raw Flux (78214 flux in 400.79ms)
+T8.0: Ignoring unexpected sector C:8 H:0 R:10 N:2
+T8.0: IBM MFM (9/9 sectors) from Raw Flux (76647 flux in 400.81ms)
+T8.1: Ignoring unexpected sector C:8 H:1 R:10 N:2
+T8.1: IBM MFM (9/9 sectors) from Raw Flux (77842 flux in 400.78ms)
+T9.0: Ignoring unexpected sector C:9 H:0 R:10 N:2
+T9.0: IBM MFM (9/9 sectors) from Raw Flux (77818 flux in 400.79ms)
+T9.1: Ignoring unexpected sector C:9 H:1 R:10 N:2
+T9.1: IBM MFM (9/9 sectors) from Raw Flux (77929 flux in 400.76ms)
+T10.0: Ignoring unexpected sector C:10 H:0 R:10 N:2
+T10.0: IBM MFM (9/9 sectors) from Raw Flux (77978 flux in 400.78ms)
+T10.1: Ignoring unexpected sector C:10 H:1 R:10 N:2
+T10.1: IBM MFM (9/9 sectors) from Raw Flux (78003 flux in 400.77ms)
+T11.0: Ignoring unexpected sector C:11 H:0 R:10 N:2
+T11.0: IBM MFM (9/9 sectors) from Raw Flux (77112 flux in 400.77ms)
+T11.1: Ignoring unexpected sector C:11 H:1 R:10 N:2
+T11.1: IBM MFM (9/9 sectors) from Raw Flux (79247 flux in 400.76ms)
+T12.0: Ignoring unexpected sector C:12 H:0 R:10 N:2
+T12.0: IBM MFM (9/9 sectors) from Raw Flux (79550 flux in 400.76ms)
+T12.1: Ignoring unexpected sector C:12 H:1 R:10 N:2
+T12.1: IBM MFM (9/9 sectors) from Raw Flux (77757 flux in 400.74ms)
+T13.0: Ignoring unexpected sector C:13 H:0 R:10 N:2
+T13.0: IBM MFM (9/9 sectors) from Raw Flux (77336 flux in 400.75ms)
+T13.1: Ignoring unexpected sector C:13 H:1 R:10 N:2
+T13.1: IBM MFM (9/9 sectors) from Raw Flux (77708 flux in 400.74ms)
+T14.0: Ignoring unexpected sector C:14 H:0 R:10 N:2
+T14.0: IBM MFM (9/9 sectors) from Raw Flux (77663 flux in 400.75ms)
+T14.1: Ignoring unexpected sector C:14 H:1 R:10 N:2
+T14.1: IBM MFM (9/9 sectors) from Raw Flux (77604 flux in 400.73ms)
+T15.0: Ignoring unexpected sector C:15 H:0 R:10 N:2
+T15.0: IBM MFM (9/9 sectors) from Raw Flux (77491 flux in 400.74ms)
+T15.1: Ignoring unexpected sector C:15 H:1 R:10 N:2
+T15.1: IBM MFM (9/9 sectors) from Raw Flux (76289 flux in 400.73ms)
+T16.0: Ignoring unexpected sector C:16 H:0 R:10 N:2
+T16.0: IBM MFM (9/9 sectors) from Raw Flux (77220 flux in 400.74ms)
+T16.1: Ignoring unexpected sector C:16 H:1 R:10 N:2
+T16.1: IBM MFM (9/9 sectors) from Raw Flux (77409 flux in 400.72ms)
+T17.0: Ignoring unexpected sector C:17 H:0 R:10 N:2
+T17.0: IBM MFM (9/9 sectors) from Raw Flux (77710 flux in 400.73ms)
+T17.1: Ignoring unexpected sector C:17 H:1 R:10 N:2
+T17.1: IBM MFM (9/9 sectors) from Raw Flux (77821 flux in 400.72ms)
+T18.0: Ignoring unexpected sector C:18 H:0 R:10 N:2
+T18.0: IBM MFM (9/9 sectors) from Raw Flux (77465 flux in 400.72ms)
+T18.1: Ignoring unexpected sector C:18 H:1 R:10 N:2
+T18.1: IBM MFM (9/9 sectors) from Raw Flux (77609 flux in 400.72ms)
+T19.0: Ignoring unexpected sector C:19 H:0 R:10 N:2
+T19.0: IBM MFM (9/9 sectors) from Raw Flux (78165 flux in 400.73ms)
+T19.1: Ignoring unexpected sector C:19 H:1 R:10 N:2
+T19.1: IBM MFM (9/9 sectors) from Raw Flux (77985 flux in 400.72ms)
+T20.0: Ignoring unexpected sector C:20 H:0 R:10 N:2
+T20.0: IBM MFM (9/9 sectors) from Raw Flux (77989 flux in 400.73ms)
+T20.1: Ignoring unexpected sector C:20 H:1 R:10 N:2
+T20.1: IBM MFM (9/9 sectors) from Raw Flux (77901 flux in 400.71ms)
+T21.0: Ignoring unexpected sector C:21 H:0 R:10 N:2
+T21.0: IBM MFM (9/9 sectors) from Raw Flux (77754 flux in 400.73ms)
+T21.1: Ignoring unexpected sector C:21 H:1 R:10 N:2
+T21.1: IBM MFM (9/9 sectors) from Raw Flux (77851 flux in 400.72ms)
+T22.0: Ignoring unexpected sector C:22 H:0 R:10 N:2
+T22.0: IBM MFM (9/9 sectors) from Raw Flux (78151 flux in 400.73ms)
+T22.1: Ignoring unexpected sector C:22 H:1 R:10 N:2
+T22.1: IBM MFM (9/9 sectors) from Raw Flux (76898 flux in 400.71ms)
+T23.0: Ignoring unexpected sector C:23 H:0 R:10 N:2
+T23.0: IBM MFM (9/9 sectors) from Raw Flux (77071 flux in 400.72ms)
+T23.1: Ignoring unexpected sector C:23 H:1 R:10 N:2
+T23.1: IBM MFM (9/9 sectors) from Raw Flux (76952 flux in 400.71ms)
+T24.0: Ignoring unexpected sector C:24 H:0 R:10 N:2
+T24.0: IBM MFM (9/9 sectors) from Raw Flux (76488 flux in 400.71ms)
+T24.1: Ignoring unexpected sector C:24 H:1 R:10 N:2
+T24.1: IBM MFM (9/9 sectors) from Raw Flux (78813 flux in 400.71ms)
+T25.0: Ignoring unexpected sector C:25 H:0 R:10 N:2
+T25.0: IBM MFM (9/9 sectors) from Raw Flux (77372 flux in 400.70ms)
+T25.1: Ignoring unexpected sector C:25 H:1 R:10 N:2
+T25.1: IBM MFM (9/9 sectors) from Raw Flux (78130 flux in 400.70ms)
+T26.0: Ignoring unexpected sector C:26 H:0 R:10 N:2
+T26.0: IBM MFM (9/9 sectors) from Raw Flux (78405 flux in 400.72ms)
+T26.1: Ignoring unexpected sector C:26 H:1 R:10 N:2
+T26.1: IBM MFM (9/9 sectors) from Raw Flux (77963 flux in 400.71ms)
+T27.0: Ignoring unexpected sector C:27 H:0 R:10 N:2
+T27.0: IBM MFM (9/9 sectors) from Raw Flux (76330 flux in 400.71ms)
+T27.1: Ignoring unexpected sector C:27 H:1 R:10 N:2
+T27.1: IBM MFM (9/9 sectors) from Raw Flux (78949 flux in 400.71ms)
+T28.0: Ignoring unexpected sector C:28 H:0 R:10 N:2
+T28.0: IBM MFM (9/9 sectors) from Raw Flux (77712 flux in 400.72ms)
+T28.1: Ignoring unexpected sector C:28 H:1 R:10 N:2
+T28.1: IBM MFM (9/9 sectors) from Raw Flux (77278 flux in 400.71ms)
+T29.0: Ignoring unexpected sector C:29 H:0 R:10 N:2
+T29.0: IBM MFM (9/9 sectors) from Raw Flux (77229 flux in 400.71ms)
+T29.1: Ignoring unexpected sector C:29 H:1 R:10 N:2
+T29.1: IBM MFM (9/9 sectors) from Raw Flux (78104 flux in 400.70ms)
+T30.0: Ignoring unexpected sector C:30 H:0 R:10 N:2
+T30.0: IBM MFM (9/9 sectors) from Raw Flux (77763 flux in 400.72ms)
+T30.1: Ignoring unexpected sector C:30 H:1 R:10 N:2
+T30.1: IBM MFM (9/9 sectors) from Raw Flux (77003 flux in 400.70ms)
+T31.0: Ignoring unexpected sector C:31 H:0 R:10 N:2
+T31.0: IBM MFM (9/9 sectors) from Raw Flux (77430 flux in 400.71ms)
+T31.1: Ignoring unexpected sector C:31 H:1 R:10 N:2
+T31.1: IBM MFM (9/9 sectors) from Raw Flux (78440 flux in 400.70ms)
+T32.0: Ignoring unexpected sector C:32 H:0 R:10 N:2
+T32.0: IBM MFM (9/9 sectors) from Raw Flux (78009 flux in 400.71ms)
+T32.1: Ignoring unexpected sector C:32 H:1 R:10 N:2
+T32.1: IBM MFM (9/9 sectors) from Raw Flux (77167 flux in 400.71ms)
+T33.0: Ignoring unexpected sector C:33 H:0 R:10 N:2
+T33.0: IBM MFM (9/9 sectors) from Raw Flux (77453 flux in 400.71ms)
+T33.1: Ignoring unexpected sector C:33 H:1 R:10 N:2
+T33.1: IBM MFM (9/9 sectors) from Raw Flux (77812 flux in 400.70ms)
+T34.0: Ignoring unexpected sector C:34 H:0 R:10 N:2
+T34.0: IBM MFM (9/9 sectors) from Raw Flux (76916 flux in 400.72ms)
+T34.1: Ignoring unexpected sector C:34 H:1 R:10 N:2
+T34.1: IBM MFM (9/9 sectors) from Raw Flux (77133 flux in 400.70ms)
+T35.0: Ignoring unexpected sector C:35 H:0 R:10 N:2
+T35.0: IBM MFM (9/9 sectors) from Raw Flux (77554 flux in 400.71ms)
+T35.1: Ignoring unexpected sector C:35 H:1 R:10 N:2
+T35.1: IBM MFM (9/9 sectors) from Raw Flux (76660 flux in 400.70ms)
+T36.0: Ignoring unexpected sector C:36 H:0 R:10 N:2
+T36.0: IBM MFM (9/9 sectors) from Raw Flux (77850 flux in 400.71ms)
+T36.1: Ignoring unexpected sector C:36 H:1 R:10 N:2
+T36.1: IBM MFM (9/9 sectors) from Raw Flux (77156 flux in 400.70ms)
+T37.0: Ignoring unexpected sector C:37 H:0 R:10 N:2
+T37.0: IBM MFM (9/9 sectors) from Raw Flux (79926 flux in 400.71ms)
+T37.1: Ignoring unexpected sector C:37 H:1 R:10 N:2
+T37.1: IBM MFM (9/9 sectors) from Raw Flux (77926 flux in 400.70ms)
+T38.0: Ignoring unexpected sector C:38 H:0 R:10 N:2
+T38.0: IBM MFM (9/9 sectors) from Raw Flux (77368 flux in 400.70ms)
+T38.1: Ignoring unexpected sector C:38 H:1 R:10 N:2
+T38.1: IBM MFM (9/9 sectors) from Raw Flux (77858 flux in 400.69ms)
+T39.0: Ignoring unexpected sector C:39 H:0 R:10 N:2
+T39.0: IBM MFM (9/9 sectors) from Raw Flux (77590 flux in 400.71ms)
+T39.1: Ignoring unexpected sector C:39 H:1 R:10 N:2
+T39.1: IBM MFM (9/9 sectors) from Raw Flux (77524 flux in 400.68ms)
+T40.0: Ignoring unexpected sector C:40 H:0 R:10 N:2
+T40.0: IBM MFM (9/9 sectors) from Raw Flux (77589 flux in 400.70ms)
+T40.1: Ignoring unexpected sector C:40 H:1 R:10 N:2
+T40.1: IBM MFM (9/9 sectors) from Raw Flux (77398 flux in 400.70ms)
+T41.0: Ignoring unexpected sector C:41 H:0 R:10 N:2
+T41.0: IBM MFM (9/9 sectors) from Raw Flux (75029 flux in 400.71ms)
+T41.1: Ignoring unexpected sector C:41 H:1 R:10 N:2
+T41.1: IBM MFM (9/9 sectors) from Raw Flux (77360 flux in 400.69ms)
+T42.0: Ignoring unexpected sector C:42 H:0 R:10 N:2
+T42.0: IBM MFM (9/9 sectors) from Raw Flux (78330 flux in 400.71ms)
+T42.1: Ignoring unexpected sector C:42 H:1 R:10 N:2
+T42.1: IBM MFM (9/9 sectors) from Raw Flux (78153 flux in 400.69ms)
+T43.0: Ignoring unexpected sector C:43 H:0 R:10 N:2
+T43.0: IBM MFM (9/9 sectors) from Raw Flux (77624 flux in 400.70ms)
+T43.1: Ignoring unexpected sector C:43 H:1 R:10 N:2
+T43.1: IBM MFM (9/9 sectors) from Raw Flux (77108 flux in 400.69ms)
+T44.0: Ignoring unexpected sector C:44 H:0 R:10 N:2
+T44.0: IBM MFM (9/9 sectors) from Raw Flux (77589 flux in 400.71ms)
+T44.1: Ignoring unexpected sector C:44 H:1 R:10 N:2
+T44.1: IBM MFM (9/9 sectors) from Raw Flux (78153 flux in 400.69ms)
+T45.0: Ignoring unexpected sector C:45 H:0 R:10 N:2
+T45.0: IBM MFM (9/9 sectors) from Raw Flux (78127 flux in 400.71ms)
+T45.1: Ignoring unexpected sector C:45 H:1 R:10 N:2
+T45.1: IBM MFM (9/9 sectors) from Raw Flux (77129 flux in 400.69ms)
+T46.0: Ignoring unexpected sector C:46 H:0 R:10 N:2
+T46.0: IBM MFM (9/9 sectors) from Raw Flux (78033 flux in 400.71ms)
+T46.1: Ignoring unexpected sector C:46 H:1 R:10 N:2
+T46.1: IBM MFM (9/9 sectors) from Raw Flux (77333 flux in 400.69ms)
+T47.0: Ignoring unexpected sector C:47 H:0 R:10 N:2
+T47.0: IBM MFM (9/9 sectors) from Raw Flux (77620 flux in 400.71ms)
+T47.1: Ignoring unexpected sector C:47 H:1 R:10 N:2
+T47.1: IBM MFM (9/9 sectors) from Raw Flux (76886 flux in 400.69ms)
+T48.0: Ignoring unexpected sector C:48 H:0 R:10 N:2
+T48.0: IBM MFM (9/9 sectors) from Raw Flux (77642 flux in 400.71ms)
+T48.1: Ignoring unexpected sector C:48 H:1 R:10 N:2
+T48.1: IBM MFM (9/9 sectors) from Raw Flux (77574 flux in 400.69ms)
+T49.0: Ignoring unexpected sector C:49 H:0 R:10 N:2
+T49.0: IBM MFM (9/9 sectors) from Raw Flux (77237 flux in 400.71ms)
+T49.1: Ignoring unexpected sector C:49 H:1 R:10 N:2
+T49.1: IBM MFM (9/9 sectors) from Raw Flux (76219 flux in 400.70ms)
+T50.0: Ignoring unexpected sector C:50 H:0 R:10 N:2
+T50.0: IBM MFM (9/9 sectors) from Raw Flux (78772 flux in 400.70ms)
+T50.1: Ignoring unexpected sector C:50 H:1 R:10 N:2
+T50.1: IBM MFM (9/9 sectors) from Raw Flux (76956 flux in 400.68ms)
+T51.0: Ignoring unexpected sector C:51 H:0 R:10 N:2
+T51.0: IBM MFM (9/9 sectors) from Raw Flux (77434 flux in 400.71ms)
+T51.1: Ignoring unexpected sector C:51 H:1 R:10 N:2
+T51.1: IBM MFM (9/9 sectors) from Raw Flux (77329 flux in 400.70ms)
+T52.0: Ignoring unexpected sector C:52 H:0 R:10 N:2
+T52.0: IBM MFM (9/9 sectors) from Raw Flux (77401 flux in 400.71ms)
+T52.1: Ignoring unexpected sector C:52 H:1 R:10 N:2
+T52.1: IBM MFM (9/9 sectors) from Raw Flux (76896 flux in 400.68ms)
+T53.0: Ignoring unexpected sector C:53 H:0 R:10 N:2
+T53.0: IBM MFM (9/9 sectors) from Raw Flux (80305 flux in 400.71ms)
+T53.1: Ignoring unexpected sector C:53 H:1 R:10 N:2
+T53.1: IBM MFM (9/9 sectors) from Raw Flux (77934 flux in 400.69ms)
+T54.0: Ignoring unexpected sector C:54 H:0 R:10 N:2
+T54.0: IBM MFM (9/9 sectors) from Raw Flux (77152 flux in 400.70ms)
+T54.1: Ignoring unexpected sector C:54 H:1 R:10 N:2
+T54.1: IBM MFM (9/9 sectors) from Raw Flux (77323 flux in 400.69ms)
+T55.0: Ignoring unexpected sector C:55 H:0 R:10 N:2
+T55.0: IBM MFM (9/9 sectors) from Raw Flux (77850 flux in 400.71ms)
+T55.1: Ignoring unexpected sector C:55 H:1 R:10 N:2
+T55.1: IBM MFM (9/9 sectors) from Raw Flux (77268 flux in 400.69ms)
+T56.0: Ignoring unexpected sector C:56 H:0 R:10 N:2
+T56.0: IBM MFM (9/9 sectors) from Raw Flux (77672 flux in 400.71ms)
+T56.1: Ignoring unexpected sector C:56 H:1 R:10 N:2
+T56.1: IBM MFM (9/9 sectors) from Raw Flux (77709 flux in 400.68ms)
+T57.0: Ignoring unexpected sector C:57 H:0 R:10 N:2
+T57.0: IBM MFM (9/9 sectors) from Raw Flux (77420 flux in 400.70ms)
+T57.1: Ignoring unexpected sector C:57 H:1 R:10 N:2
+T57.1: IBM MFM (9/9 sectors) from Raw Flux (76649 flux in 400.69ms)
+T58.0: Ignoring unexpected sector C:58 H:0 R:10 N:2
+T58.0: IBM MFM (9/9 sectors) from Raw Flux (77525 flux in 400.69ms)
+T58.1: Ignoring unexpected sector C:58 H:1 R:10 N:2
+T58.1: IBM MFM (9/9 sectors) from Raw Flux (76877 flux in 400.69ms)
+T59.0: Ignoring unexpected sector C:59 H:0 R:10 N:2
+T59.0: IBM MFM (9/9 sectors) from Raw Flux (78075 flux in 400.70ms)
+T59.1: Ignoring unexpected sector C:59 H:1 R:10 N:2
+T59.1: IBM MFM (9/9 sectors) from Raw Flux (77274 flux in 400.69ms)
+T60.0: Ignoring unexpected sector C:60 H:0 R:10 N:2
+T60.0: IBM MFM (9/9 sectors) from Raw Flux (77244 flux in 400.71ms)
+T60.1: Ignoring unexpected sector C:60 H:1 R:10 N:2
+T60.1: IBM MFM (9/9 sectors) from Raw Flux (76810 flux in 400.70ms)
+T61.0: Ignoring unexpected sector C:61 H:0 R:10 N:2
+T61.0: Ignoring unexpected sector C:61 H:0 R:10 N:2
+T61.0: IBM MFM (9/9 sectors) from Raw Flux (78000 flux in 400.70ms)
+T61.1: Ignoring unexpected sector C:61 H:1 R:10 N:2
+T61.1: IBM MFM (9/9 sectors) from Raw Flux (76981 flux in 400.69ms)
+T62.0: Ignoring unexpected sector C:62 H:0 R:10 N:2
+T62.0: IBM MFM (9/9 sectors) from Raw Flux (78448 flux in 400.70ms)
+T62.1: Ignoring unexpected sector C:62 H:1 R:10 N:2
+T62.1: IBM MFM (9/9 sectors) from Raw Flux (77330 flux in 400.69ms)
+T63.0: Ignoring unexpected sector C:63 H:0 R:10 N:2
+T63.0: Ignoring unexpected sector C:63 H:0 R:10 N:2
+T63.0: IBM MFM (9/9 sectors) from Raw Flux (77614 flux in 400.70ms)
+T63.1: Ignoring unexpected sector C:63 H:1 R:10 N:2
+T63.1: IBM MFM (9/9 sectors) from Raw Flux (78116 flux in 400.68ms)
+T64.0: Ignoring unexpected sector C:64 H:0 R:10 N:2
+T64.0: IBM MFM (9/9 sectors) from Raw Flux (78027 flux in 400.70ms)
+T64.1: Ignoring unexpected sector C:64 H:1 R:10 N:2
+T64.1: IBM MFM (9/9 sectors) from Raw Flux (77770 flux in 400.68ms)
+T65.0: Ignoring unexpected sector C:65 H:0 R:10 N:2
+T65.0: IBM MFM (9/9 sectors) from Raw Flux (76881 flux in 400.70ms)
+T65.1: Ignoring unexpected sector C:65 H:1 R:10 N:2
+T65.1: IBM MFM (9/9 sectors) from Raw Flux (78149 flux in 400.69ms)
+T66.0: Ignoring unexpected sector C:66 H:0 R:10 N:2
+T66.0: IBM MFM (9/9 sectors) from Raw Flux (77769 flux in 400.71ms)
+T66.1: Ignoring unexpected sector C:66 H:1 R:10 N:2
+T66.1: IBM MFM (9/9 sectors) from Raw Flux (77565 flux in 400.69ms)
+T67.0: Ignoring unexpected sector C:67 H:0 R:10 N:2
+T67.0: IBM MFM (9/9 sectors) from Raw Flux (77613 flux in 400.70ms)
+T67.1: Ignoring unexpected sector C:67 H:1 R:10 N:2
+T67.1: IBM MFM (9/9 sectors) from Raw Flux (77198 flux in 400.68ms)
+T68.0: Ignoring unexpected sector C:68 H:0 R:10 N:2
+T68.0: IBM MFM (9/9 sectors) from Raw Flux (79126 flux in 400.70ms)
+T68.1: Ignoring unexpected sector C:68 H:1 R:10 N:2
+T68.1: IBM MFM (9/9 sectors) from Raw Flux (79093 flux in 400.68ms)
+T69.0: Ignoring unexpected sector C:69 H:0 R:10 N:2
+T69.0: IBM MFM (9/9 sectors) from Raw Flux (77490 flux in 400.70ms)
+T69.1: Ignoring unexpected sector C:69 H:1 R:10 N:2
+T69.1: IBM MFM (9/9 sectors) from Raw Flux (77206 flux in 400.68ms)
+T70.0: Ignoring unexpected sector C:70 H:0 R:10 N:2
+T70.0: IBM MFM (9/9 sectors) from Raw Flux (77618 flux in 400.69ms)
+T70.1: Ignoring unexpected sector C:70 H:1 R:10 N:2
+T70.1: IBM MFM (9/9 sectors) from Raw Flux (77547 flux in 400.69ms)
+T71.0: Ignoring unexpected sector C:71 H:0 R:10 N:2
+T71.0: IBM MFM (9/9 sectors) from Raw Flux (77320 flux in 400.69ms)
+T71.1: Ignoring unexpected sector C:71 H:1 R:10 N:2
+T71.1: IBM MFM (9/9 sectors) from Raw Flux (77518 flux in 400.68ms)
+T72.0: Ignoring unexpected sector C:72 H:0 R:10 N:2
+T72.0: IBM MFM (9/9 sectors) from Raw Flux (76580 flux in 400.70ms)
+T72.1: Ignoring unexpected sector C:72 H:1 R:10 N:2
+T72.1: IBM MFM (9/9 sectors) from Raw Flux (77053 flux in 400.68ms)
+T73.0: Ignoring unexpected sector C:73 H:0 R:10 N:2
+T73.0: IBM MFM (9/9 sectors) from Raw Flux (77654 flux in 400.70ms)
+T73.1: Ignoring unexpected sector C:73 H:1 R:10 N:2
+T73.1: IBM MFM (9/9 sectors) from Raw Flux (77646 flux in 400.68ms)
+T74.0: Ignoring unexpected sector C:74 H:0 R:10 N:2
+T74.0: IBM MFM (9/9 sectors) from Raw Flux (77989 flux in 400.69ms)
+T74.1: Ignoring unexpected sector C:74 H:1 R:10 N:2
+T74.1: IBM MFM (9/9 sectors) from Raw Flux (77893 flux in 400.67ms)
+T75.0: Ignoring unexpected sector C:75 H:0 R:10 N:2
+T75.0: IBM MFM (9/9 sectors) from Raw Flux (78065 flux in 400.70ms)
+T75.1: Ignoring unexpected sector C:75 H:1 R:10 N:2
+T75.1: IBM MFM (9/9 sectors) from Raw Flux (78177 flux in 400.69ms)
+T76.0: Ignoring unexpected sector C:76 H:0 R:10 N:2
+T76.0: IBM MFM (9/9 sectors) from Raw Flux (78253 flux in 400.70ms)
+T76.1: Ignoring unexpected sector C:76 H:1 R:10 N:2
+T76.1: IBM MFM (9/9 sectors) from Raw Flux (78202 flux in 400.69ms)
+T77.0: Ignoring unexpected sector C:77 H:0 R:10 N:2
+T77.0: IBM MFM (9/9 sectors) from Raw Flux (77904 flux in 400.70ms)
+T77.1: Ignoring unexpected sector C:77 H:1 R:10 N:2
+T77.1: IBM MFM (9/9 sectors) from Raw Flux (78142 flux in 400.69ms)
+T78.0: Ignoring unexpected sector C:78 H:0 R:10 N:2
+T78.0: IBM MFM (9/9 sectors) from Raw Flux (76774 flux in 400.71ms)
+T78.1: Ignoring unexpected sector C:78 H:1 R:10 N:2
+T78.1: IBM MFM (9/9 sectors) from Raw Flux (77355 flux in 400.67ms)
+T79.0: Ignoring unexpected sector C:79 H:0 R:10 N:2
+T79.0: IBM MFM (9/9 sectors) from Raw Flux (77394 flux in 400.70ms)
+T79.1: Ignoring unexpected sector C:79 H:1 R:10 N:2
+T79.1: IBM MFM (9/9 sectors) from Raw Flux (77208 flux in 400.67ms)
+Cyl-> 0         1         2         3         4         5         6         7         
+H. S: 01234567890123456789012345678901234567890123456789012345678901234567890123456789
+0. 0: ................................................................................
+0. 1: ................................................................................
+0. 2: ................................................................................
+0. 3: ................................................................................
+0. 4: ................................................................................
+0. 5: ................................................................................
+0. 6: ................................................................................
+0. 7: ................................................................................
+0. 8: ................................................................................
+1. 0: ................................................................................
+1. 1: ................................................................................
+1. 2: ................................................................................
+1. 3: ................................................................................
+1. 4: ................................................................................
+1. 5: ................................................................................
+1. 6: ................................................................................
+1. 7: ................................................................................
+1. 8: ................................................................................
+Found 1440 sectors of 1440 (100%)

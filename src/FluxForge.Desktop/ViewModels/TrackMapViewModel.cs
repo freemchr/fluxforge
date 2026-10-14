@@ -24,6 +24,7 @@ public sealed partial class TrackCellViewModel(int cylinder, int head, Action<Tr
         ? $"{AccessibleName}" +
           (o.SectorsTotal is { } t ? $"\nSectors: {o.SectorsFound}/{t}" : "") +
           (o.Retries > 0 ? $"\nRetries: {o.Retries}" : "") +
+          (o.UnexpectedSectors > 0 ? $"\nSectors outside the selected format: {o.UnexpectedSectors}" : "") +
           $"\nParser confidence: {o.Confidence}"
         : AccessibleName;
 

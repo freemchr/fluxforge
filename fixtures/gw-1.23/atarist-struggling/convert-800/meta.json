@@ -1,0 +1,5 @@
+{
+  "args": ["convert", "--format=atarist.800", "<fixture>\\images\\raw-format.scp", "<fixture>\\images\\decoded-800.st"],
+  "exitCode": 0,
+  "note": "Offline decode of the same raw capture as atarist.800: 1600/1600 sectors."
+}

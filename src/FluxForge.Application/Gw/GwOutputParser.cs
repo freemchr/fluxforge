@@ -64,6 +64,9 @@ public static partial class GwOutputParser
     [GeneratedRegex(@"\((?<found>\d+)/(?<total>\d+) sectors\)")]
     internal static partial Regex SectorCount();
 
+    [GeneratedRegex(@"Ignoring unexpected sector C:(?<c>\d+) H:(?<h>\d+) R:(?<r>\d+) N:(?<n>\d+)")]
+    internal static partial Regex UnexpectedSector();
+
     [GeneratedRegex(@"Found (?<found>\d+) sectors of (?<total>\d+)")]
     internal static partial Regex Summary();
 
@@ -80,6 +83,15 @@ public sealed class TrackProgressTracker
     public int UnparsedLines { get; private set; }
 
     /// <summary>
+    /// Sectors gw found on the disk but discarded because the selected format doesn't define them,
+    /// e.g. sector 10 on a 9-sector format. These are NOT in a sector image.
+    /// </summary>
+    public int UnexpectedSectors => _tracks.Values.Sum(t => t.UnexpectedSectors);
+
+    /// <summary>Highest sector number seen outside the format (R value), or 0.</summary>
+    public int HighestUnexpectedSector { get; private set; }
+
+    /// <summary>
     /// First fatal message from gw. gw 1.23 can print <c>Command Failed: ...</c> and still exit 0,
     /// so callers must treat this as failure regardless of the exit code.
     /// </summary>
@@ -88,6 +100,7 @@ public sealed class TrackProgressTracker
     /// <summary>Feed one output line; returns the affected track, if any.</summary>
     public TrackObservation? Feed(string line)
     {
+        TrackObservation next;
         line = line.Trim();
         if (line.Length == 0) return null;
 
@@ -118,7 +131,20 @@ public sealed class TrackProgressTracker
         var log = (prev?.LogLines ?? []).Append(line).ToArray();
         var retries = prev?.Retries ?? 0;
 
-        TrackObservation next;
+        var unexpected = GwOutputParser.UnexpectedSector().Match(rest);
+        if (unexpected.Success)
+        {
+            // gw 1.23: "T0.0: Ignoring unexpected sector C:0 H:0 R:10 N:2". Counted once per track
+            // (retries repeat the line), so the total reflects distinct missing sectors.
+            HighestUnexpectedSector = Math.Max(HighestUnexpectedSector, GwOutputParser.Int(unexpected.Groups["r"]));
+            var count = prev?.LogLines.Count(l => l.Contains(unexpected.Value, StringComparison.Ordinal)) > 0
+                ? prev!.UnexpectedSectors
+                : (prev?.UnexpectedSectors ?? 0) + 1;
+            next = (prev ?? Empty(key)) with { UnexpectedSectors = count, LogLines = log, Confidence = prev?.Confidence ?? ParseConfidence.High };
+            _tracks[key] = next;
+            return next;
+        }
+
         var sectors = GwOutputParser.SectorCount().Match(rest);
         if (sectors.Success)
         {
@@ -129,7 +155,7 @@ public sealed class TrackProgressTracker
             var status = found == total && total > 0
                 ? (retries > 0 ? TrackStatus.RecoveredAfterRetry : TrackStatus.DecodedOk)
                 : TrackStatus.Unreadable;
-            next = new TrackObservation(key.Item1, key.Item2, status, found, total, retries, ParseConfidence.High, log);
+            next = new TrackObservation(key.Item1, key.Item2, status, found, total, retries, ParseConfidence.High, log, prev?.UnexpectedSectors ?? 0);
         }
         else if (rest.StartsWith("Giving up", StringComparison.OrdinalIgnoreCase))
         {
@@ -142,7 +168,7 @@ public sealed class TrackProgressTracker
         }
         else if (rest.StartsWith("Raw Flux", StringComparison.OrdinalIgnoreCase))
         {
-            next = new TrackObservation(key.Item1, key.Item2, TrackStatus.FluxCapturedDecodeUnknown, null, null, retries, ParseConfidence.Medium, log);
+            next = new TrackObservation(key.Item1, key.Item2, TrackStatus.FluxCapturedDecodeUnknown, null, null, retries, ParseConfidence.Medium, log, prev?.UnexpectedSectors ?? 0);
         }
         else
         {

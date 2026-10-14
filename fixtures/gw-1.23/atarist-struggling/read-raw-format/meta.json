@@ -1,0 +1,6 @@
+{
+  "args": ["read", "--format=atarist.720", "--raw", "--retries=1", "--drive=B", "<fixture>\\images\\raw-format.scp"],
+  "exitCode": 0,
+  "seconds": 111,
+  "note": "Atari ST disk that is really 10 sectors/track (800K). Read as 720K: every track reports an unexpected sector R:10."
+}
