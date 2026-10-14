@@ -18,6 +18,12 @@ public enum TrackStatus
     Written,
     /// <summary>Written and confirmed by gw's verify pass.</summary>
     Verified,
+    /// <summary>Verify: every sector read from the disk is identical to the image.</summary>
+    Match,
+    /// <summary>Verify: at least one sector read from the disk differs from the image.</summary>
+    Mismatch,
+    /// <summary>Verify: the image itself has no data for some sectors (gw's bad-sector fill), so they could not be compared.</summary>
+    NotInImage,
 }
 
 /// <summary>How sure the parser is that it understood the tool's output for this track.</summary>
@@ -32,7 +38,8 @@ public sealed record TrackObservation(
     int Retries,
     ParseConfidence Confidence,
     IReadOnlyList<string> LogLines,
-    int UnexpectedSectors = 0);
+    int UnexpectedSectors = 0,
+    string? Detail = null);
 
 public sealed record SectorSummary(int Found, int Total)
 {

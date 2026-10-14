@@ -7,6 +7,7 @@ using FluxForge.Application.Gw;
 using FluxForge.Application.Processes;
 using FluxForge.Application.Safety;
 using FluxForge.Application.Tools;
+using FluxForge.Application.Verify;
 
 namespace FluxForge.Application.Jobs;
 
@@ -16,6 +17,12 @@ public sealed record WriteJob(HostToolsInstallation Tools, WriteRequest Request,
 
 /// <summary>Decode a raw flux capture into a sector image with <c>gw convert</c>. No hardware involved.</summary>
 public sealed record DecodeJob(HostToolsInstallation Tools, string InputPath, string OutputPath, DiskProfile Profile);
+
+/// <summary>
+/// Read the disk into a temporary sector image and compare it sector by sector with <paramref name="ImagePath"/>.
+/// A raw capture (.scp) is decoded with <paramref name="Profile"/> first. Nothing is written anywhere but temp.
+/// </summary>
+public sealed record VerifyJob(HostToolsInstallation Tools, string ImagePath, DiskProfile Profile, DeviceTarget Target, GwInfo? Device, int? Retries = null);
 
 public interface IJobActivity
 {
@@ -59,6 +66,9 @@ public sealed class JobRunner(IProcessRunner runner, IJobStore store, TimeProvid
 
     public Task<JobRecord> RunWriteAsync(WriteJob job, IProgress<JobProgress>? progress, CancellationToken ct) =>
         WithDeviceAsync(job.Request.Target.Port, () => WriteCoreAsync(job, progress, ct));
+
+    public Task<JobRecord> RunVerifyAsync(VerifyJob job, IProgress<JobProgress>? progress, CancellationToken ct) =>
+        WithDeviceAsync(job.Target.Port, () => VerifyCoreAsync(job, progress, ct));
 
     /// <summary>
     /// Offline decode. Doesn't take the device lock (no hardware), but counts as an active job so host
@@ -195,6 +205,113 @@ public sealed class JobRunner(IProcessRunner runner, IJobStore store, TimeProvid
         return await FinishAsync(record, result, status, detail, tracker, artifacts, progress).ConfigureAwait(false);
     }
 
+    private async Task<JobRecord> VerifyCoreAsync(VerifyJob job, IProgress<JobProgress>? progress, CancellationToken ct)
+    {
+        var image = Path.GetFullPath(job.ImagePath);
+        var blocking = OutputGuard.CheckVerifyImage(image, job.Profile).Where(i => i.Blocking).ToList();
+        if (blocking.Count > 0)
+            throw new InvalidOperationException(string.Join(Environment.NewLine, blocking.Select(i => i.Message)));
+
+        var raw = GwCommands.RawFluxExtensions.Contains(Path.GetExtension(image));
+        var work = Directory.CreateTempSubdirectory("fluxforge-verify-").FullName;
+        try
+        {
+            var readback = Path.Combine(work, "disk" + job.Profile.SectorExtension);
+            var readArgs = GwCommands.Read(new ReadRequest(readback, CaptureMode.SectorImage, job.Profile, job.Target, Retries: job.Retries));
+            var source = await ArtifactAsync(image, raw ? ArtifactKind.RawFlux : ArtifactKind.SectorImage, true, ct).ConfigureAwait(false);
+            var record = NewRecord(JobKind.Verify, $"Verify disk against {Path.GetFileName(image)}", job.Tools, job.Device, readArgs) with
+            {
+                ProfileId = job.Profile.Id,
+                GwFormat = job.Profile.GwFormat,
+                CaptureMode = CaptureMode.SectorImage,
+                DevicePort = job.Target.Port ?? job.Device?.Port,
+            };
+
+            // A raw capture has no sectors to compare until it is decoded with the same format.
+            var reference = image;
+            ProcessResult? decode = null;
+            if (raw)
+            {
+                reference = Path.Combine(work, "image" + job.Profile.SectorExtension);
+                progress?.Report(new JobProgress(JobStatus.Running, TimeSpan.Zero,
+                    new OutputLine(OutputStream.StdErr, "[FluxForge] Decoding the reference capture before reading the disk.", DateTimeOffset.Now)));
+                var lines = new SyncProgress<OutputLine>(line => progress?.Report(new JobProgress(JobStatus.Running, TimeSpan.Zero, line)));
+                decode = await runner.RunAsync(new ProcessRequest(job.Tools.ExecutablePath, GwCommands.Convert(image, reference, job.Profile),
+                    Timeout: TimeSpan.FromMinutes(10)), lines, ct).ConfigureAwait(false);
+                var decoded = File.Exists(reference) && new FileInfo(reference).Length == job.Profile.ExpectedSectorImageBytes;
+                if (decode.Cancelled || decode.TimedOut || decode.ExitCode != 0 || !decoded)
+                {
+                    var (status, detail) = decode.Cancelled
+                        ? (JobStatus.Cancelled, "Cancelled while decoding the reference capture. The disk was not read.")
+                        : (JobStatus.Failed, $"Could not decode {Path.GetFileName(image)} as {job.Profile.GwFormat}, so the disk was not read. {LastError(decode)}".Trim());
+                    return await FinishAsync(record, decode, status, detail, new TrackProgressTracker(), [source], progress).ConfigureAwait(false);
+                }
+            }
+
+            var tracker = new TrackProgressTracker();
+            var read = await RunTrackedAsync(job.Tools, readArgs, tracker, progress, ct).ConfigureAwait(false);
+            tracker.Finish();
+            var log = decode is null ? read : read with { Lines = [.. decode.Lines, .. read.Lines] };
+            var outputExists = File.Exists(readback) && new FileInfo(readback).Length > 0;
+            var (readStatus, readDetail) = EvaluateRead(read, tracker, CaptureMode.SectorImage, job.Profile, outputExists);
+            if (read.Cancelled)
+                return await FinishAsync(record, log, JobStatus.Cancelled, $"Cancelled{Where(tracker)}. Nothing was compared.", tracker, [source], progress).ConfigureAwait(false);
+            if (readStatus == JobStatus.Failed || !outputExists)
+                return await FinishAsync(record, log, JobStatus.Failed, readDetail, tracker, [source], progress).ConfigureAwait(false);
+
+            VerifyComparison comparison;
+            try
+            {
+                var want = await File.ReadAllBytesAsync(reference, CancellationToken.None).ConfigureAwait(false);
+                var got = await File.ReadAllBytesAsync(readback, CancellationToken.None).ConfigureAwait(false);
+                comparison = SectorComparer.Compare(want, got, job.Profile);
+            }
+            catch (ArgumentException e)
+            {
+                return await FinishAsync(record, log, JobStatus.Failed, e.Message, tracker, [source], progress).ConfigureAwait(false);
+            }
+            var (verifyStatus, verifyDetail) = EvaluateVerify(comparison, tracker, job.Profile, Path.GetFileName(image));
+            return await FinishAsync(record, log, verifyStatus, verifyDetail, tracker, [source], progress, r => r with
+            {
+                Tracks = SectorComparer.ToObservations(comparison),
+                Sectors = new SectorSummary(comparison.Matched, comparison.Total),
+                Verify = VerifySummary.From(comparison),
+            }).ConfigureAwait(false);
+        }
+        finally
+        {
+            try { Directory.Delete(work, recursive: true); } catch (IOException) { } catch (UnauthorizedAccessException) { }
+        }
+    }
+
+    /// <summary>
+    /// Verdict for a completed comparison. Success needs every sector of the format read and identical;
+    /// a disk that also carries sectors the format doesn't define is not the same disk as the image.
+    /// </summary>
+    public static (JobStatus Status, string Detail) EvaluateVerify(VerifyComparison comparison, TrackProgressTracker tracker, DiskProfile profile, string imageName)
+    {
+        var differs = comparison.Count(SectorVerdict.Differs);
+        var unreadable = comparison.Count(SectorVerdict.UnreadableOnDisk);
+        var notInImage = comparison.Count(SectorVerdict.NotInImage);
+        var extra = tracker.UnexpectedSectors > 0
+            ? $" The disk also has {tracker.UnexpectedSectors:N0} sector(s) beyond what {profile.GwFormat} defines; those were not compared."
+            : "";
+        var unreadableNote = unreadable > 0 ? $" {unreadable:N0} more could not be read from the disk." : "";
+        var gapNote = notInImage > 0 ? $" {notInImage:N0} sector(s) have no data in the image (unreadable when it was made) and were skipped." : "";
+
+        if (differs > 0)
+            return (JobStatus.Failed, $"{differs:N0} sector(s) on {comparison.TracksWith(SectorVerdict.Differs)} track(s) differ from {imageName}.{unreadableNote}{gapNote}{extra}");
+        if (unreadable > 0)
+            return (JobStatus.Partial, $"{unreadable:N0} sector(s) on {comparison.TracksWith(SectorVerdict.UnreadableOnDisk)} track(s) could not be read from the disk. "
+                + $"The other {comparison.Matched:N0} match {imageName}.{gapNote}{extra}");
+        if (notInImage > 0)
+            return (JobStatus.Partial, $"{comparison.Matched:N0} of {comparison.Total:N0} sectors match {imageName}. The other {notInImage:N0} have no data in the image "
+                + $"(unreadable when it was made), so they could not be compared.{extra}");
+        if (extra.Length > 0)
+            return (JobStatus.Partial, $"All {comparison.Total:N0} sectors match {imageName}.{extra}");
+        return (JobStatus.Succeeded, $"All {comparison.Total:N0} sectors match {imageName}.");
+    }
+
     private async Task<JobRecord> WriteCoreAsync(WriteJob job, IProgress<JobProgress>? progress, CancellationToken ct)
     {
         var req = job.Request;
@@ -242,7 +359,7 @@ public sealed class JobRunner(IProcessRunner runner, IJobStore store, TimeProvid
     }
 
     private async Task<JobRecord> FinishAsync(JobRecord record, ProcessResult result, JobStatus status, string detail,
-        TrackProgressTracker tracker, IReadOnlyList<JobArtifact> artifacts, IProgress<JobProgress>? progress)
+        TrackProgressTracker tracker, IReadOnlyList<JobArtifact> artifacts, IProgress<JobProgress>? progress, Func<JobRecord, JobRecord>? amend = null)
     {
         var final = record with
         {
@@ -257,6 +374,7 @@ public sealed class JobRunner(IProcessRunner runner, IJobStore store, TimeProvid
                 ? new FormatRegistry().SuggestForExtraSectors(chosen, tracker.HighestUnexpectedSector)?.Id
                 : null,
         };
+        if (amend is not null) final = amend(final);
         // The audit record is saved even if the caller cancelled.
         final = await store.SaveAsync(final, result.Lines, CancellationToken.None).ConfigureAwait(false);
         progress?.Report(new JobProgress(status, result.Duration));

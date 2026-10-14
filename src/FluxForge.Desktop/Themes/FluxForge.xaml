@@ -13,7 +13,7 @@
     <SolidColorBrush x:Key="FfErrorBrush" Color="#F85149" />
     <SolidColorBrush x:Key="FfInfoBrush" Color="#58A6FF" />
     <SolidColorBrush x:Key="FfNeutralBrush" Color="#6E7681" />
-    <SolidColorBrush x:Key="FfAccentBrush" Color="#14B8C4" />
+    <SolidColorBrush x:Key="FfAccentBrush" Color="#0A84FF" />
     <SolidColorBrush x:Key="FfSimulatedBrush" Color="#BC8CFF" />
     <SolidColorBrush x:Key="FfEmptyCellBrush" Color="#33808080" />
 

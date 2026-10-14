@@ -6,7 +6,7 @@ namespace FluxForge.Desktop.Services;
 
 public sealed class ThemeService(ISettingsStore settings)
 {
-    private static readonly Color Accent = Color.FromRgb(0x14, 0xB8, 0xC4);
+    private static readonly Color Accent = Color.FromRgb(0x0A, 0x84, 0xFF);
 
     public bool IsDark { get; private set; } = true;
 

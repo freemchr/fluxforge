@@ -29,13 +29,18 @@ public sealed partial class TrackCellViewModel(int cylinder, int head, Action<Tr
     public System.Windows.Media.Brush Brush => StatusVisuals.For(Status).Brush;
     public string AccessibleName => $"Cylinder {Cylinder}, side {Head}: {StatusVisuals.For(Status).Label}";
 
-    public string ToolTip => Observation is { } o
-        ? $"{AccessibleName}" +
+    public string ToolTip => Observation switch
+    {
+        null => AccessibleName,
+        // Verify results: sectors "found" are the ones that matched the image.
+        var v when v.Status == TrackStatus.Match || v.Detail is not null =>
+            $"{AccessibleName}\nMatching sectors: {v.SectorsFound}/{v.SectorsTotal}" + (v.Detail is { } d ? $"\n{d}" : ""),
+        var o => $"{AccessibleName}" +
           (o.SectorsTotal is { } t ? $"\nSectors: {o.SectorsFound}/{t}" : "") +
           (o.Retries > 0 ? $"\nRetries: {o.Retries}" : "") +
           (o.UnexpectedSectors > 0 ? $"\nSectors outside the selected format: {o.UnexpectedSectors}" : "") +
-          $"\nParser confidence: {o.Confidence}"
-        : AccessibleName;
+          $"\nParser confidence: {o.Confidence}",
+    };
 
     [RelayCommand]
     private void Select() => select(this);
@@ -65,6 +70,8 @@ public sealed partial class TrackMapViewModel : ObservableObject
         [TrackStatus.NotRead, TrackStatus.Reading, TrackStatus.DecodedOk, TrackStatus.RecoveredAfterRetry, TrackStatus.Unreadable, TrackStatus.ExtraSectors, TrackStatus.FluxCapturedDecodeUnknown];
     private static readonly TrackStatus[] WriteLegend =
         [TrackStatus.NotRead, TrackStatus.Writing, TrackStatus.Written, TrackStatus.Verified];
+    private static readonly TrackStatus[] VerifyLegend =
+        [TrackStatus.NotRead, TrackStatus.Reading, TrackStatus.DecodedOk, TrackStatus.Match, TrackStatus.Mismatch, TrackStatus.Unreadable, TrackStatus.NotInImage];
 
     private TrackCellViewModel? _current;
 
@@ -73,8 +80,13 @@ public sealed partial class TrackMapViewModel : ObservableObject
     [NotifyPropertyChangedFor(nameof(Legend))]
     public partial bool IsWrite { get; set; }
 
+    /// <summary>Verify maps: read statuses while reading, then compare statuses.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(Legend))]
+    public partial bool IsVerify { get; set; }
+
     public IReadOnlyList<StatusVisual> Legend =>
-        [.. (IsWrite ? WriteLegend : ReadLegend).Select(s => StatusVisuals.For(s))];
+        [.. (IsVerify ? VerifyLegend : IsWrite ? WriteLegend : ReadLegend).Select(s => StatusVisuals.For(s))];
 
     /// <summary>
     /// Live progress: record the finished track, then pulse the track gw will do next. gw works

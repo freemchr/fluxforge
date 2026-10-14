@@ -55,14 +55,6 @@ public sealed partial class ShellViewModel : ObservableObject, INavigator
         new(Pages.Settings, "Settings", SymbolRegular.Settings24, "Ctrl+9"),
     ];
 
-    private readonly Dictionary<string, object> _placeholders = new()
-    {
-        [Pages.Verify] = new PlaceholderViewModel("Verify", "Phase 2 · v1.0",
-            "Backend-supported verification and independent readback comparison. Flux byte comparison is never labelled physical verification."),
-        [Pages.Library] = new PlaceholderViewModel("Library", "Phase 2 · v1.0",
-            "Catalogue disks with hashes, provenance, condition notes, tags and scans. Every job is already recorded under Activity."),
-    };
-
     [ObservableProperty]
     public partial NavItem? Selected { get; set; }
 
@@ -77,16 +69,23 @@ public sealed partial class ShellViewModel : ObservableObject, INavigator
             Pages.Home => services.GetRequiredService<HomeViewModel>(),
             Pages.Read => services.GetRequiredService<ReadDiskViewModel>(),
             Pages.Write => services.GetRequiredService<WriteDiskViewModel>(),
+            Pages.Verify => services.GetRequiredService<VerifyViewModel>(),
             Pages.ImageStudio => services.GetRequiredService<ImageStudioViewModel>(),
+            Pages.Library => services.GetRequiredService<LibraryViewModel>(),
             Pages.DriveTools => services.GetRequiredService<DriveToolsViewModel>(),
             Pages.Activity => services.GetRequiredService<ActivityViewModel>(),
             Pages.Settings => services.GetRequiredService<SettingsViewModel>(),
-            _ => _placeholders[value.Key],
+            _ => throw new InvalidOperationException($"Unknown page '{value.Key}'."),
         };
         if (CurrentPage is IPageLifecycle page) page.OnNavigatedTo();
     }
 
     public string SupportUrl => AppLinks.Issues;
+
+    public string RepositoryUrl => AppLinks.Repository;
+
+    [RelayCommand]
+    private static void OpenRepository() => AppLinks.Open(AppLinks.Repository);
 
     [RelayCommand]
     private static void OpenSupport() => AppLinks.Open(AppLinks.Issues);
@@ -102,5 +101,3 @@ public interface IPageLifecycle
 {
     void OnNavigatedTo();
 }
-
-public sealed record PlaceholderViewModel(string Title, string Phase, string Description);

@@ -27,6 +27,9 @@ public static class StatusVisuals
         TrackStatus.Writing => new("Writing", "…", "FfAccentBrush"),
         TrackStatus.Written => new("Written, not yet verified", "W", "FfInfoBrush"),
         TrackStatus.Verified => new("Written and verified", "✓", "FfSuccessBrush"),
+        TrackStatus.Match => new("Matches the image", "=", "FfSuccessBrush"),
+        TrackStatus.Mismatch => new("Differs from the image", "≠", "FfErrorBrush"),
+        TrackStatus.NotInImage => new("Image has no data to compare", "?", "FfWarningBrush"),
 
         JobStatus.Pending => new("Pending", "•", "FfNeutralBrush"),
         JobStatus.Running => new("Running", "…", "FfAccentBrush"),

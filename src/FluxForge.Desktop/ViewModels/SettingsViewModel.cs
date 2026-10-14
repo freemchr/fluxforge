@@ -42,6 +42,9 @@ public sealed partial class SettingsViewModel(
 
     [ObservableProperty] public partial string? CustomGwPath { get; set; }
     [ObservableProperty] public partial string DevicePort { get; set; } = "";
+
+    /// <summary>Whether the port in use was typed in here or found by gw.</summary>
+    [ObservableProperty] public partial string PortSource { get; set; } = "";
     [ObservableProperty] public partial bool IsDarkTheme { get; set; } = true;
     [ObservableProperty] public partial bool CheckForUpdates { get; set; } = true;
     [ObservableProperty] public partial string? SkippedVersion { get; set; }
@@ -56,6 +59,7 @@ public sealed partial class SettingsViewModel(
         var s = settings.Load();
         CustomGwPath = s.CustomGwPath;
         DevicePort = s.DevicePort ?? "";
+        PortSource = SourceOf(s.DevicePort);
         IsDarkTheme = theme.IsDark;
         CheckForUpdates = s.CheckForUpdates;
         SkippedVersion = s.SkippedVersion;
@@ -163,8 +167,11 @@ public sealed partial class SettingsViewModel(
     {
         var port = DevicePort.Trim();
         settings.Save(settings.Load() with { DevicePort = port.Length == 0 ? null : port });
+        PortSource = SourceOf(port);
         await State.DetectDeviceAsync();
     }
+
+    private static string SourceOf(string? savedPort) => string.IsNullOrWhiteSpace(savedPort) ? "(found automatically)" : "(set manually)";
 
     [RelayCommand]
     private async Task CheckNowAsync()

@@ -1,0 +1,6 @@
+{
+  "args": ["read", "--format=amiga.amigados", "--drive=B", "<temp>\\disk.adf"],
+  "exitCode": 0,
+  "seconds": 45,
+  "note": "Real Verify run via the FluxForge Verify page: CF0 write-test disk compared with its backup image (before.adf). All 1760 sectors matched. Output extracted from the job log (timestamps removed)."
+}

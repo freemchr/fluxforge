@@ -134,6 +134,7 @@
                                 </ItemsControl.ItemTemplate>
                             </ItemsControl>
                             <WrapPanel Margin="0,8,0,0">
+                                <ui:Button Content="Verify against this image" Icon="{ui:SymbolIcon CheckmarkCircle24}" Command="{Binding VerifyAgainstImageCommand}" Margin="0,0,8,0" />
                                 <ui:Button Content="Read it back" Icon="{ui:SymbolIcon ArrowDownload24}" Command="{Binding ReadOriginalFirstCommand}" />
                             </WrapPanel>
                         </StackPanel>

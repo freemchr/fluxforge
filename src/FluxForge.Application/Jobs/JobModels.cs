@@ -1,9 +1,10 @@
 using FluxForge.Application.Gw;
 using FluxForge.Application.Processes;
+using FluxForge.Application.Verify;
 
 namespace FluxForge.Application.Jobs;
 
-public enum JobKind { Read, Write, Convert, DriveTool }
+public enum JobKind { Read, Write, Convert, DriveTool, Verify }
 
 public enum JobStatus
 {
@@ -24,6 +25,13 @@ public enum JobStatus
 public enum ArtifactKind { RawFlux, SectorImage }
 
 public sealed record JobArtifact(string Path, string Sha256, long Bytes, ArtifactKind Kind, bool Complete);
+
+/// <summary>Outcome of a sector-by-sector comparison between a disk and an image.</summary>
+public sealed record VerifySummary(int Total, int Matched, int Differs, int UnreadableOnDisk, int NotInImage, IReadOnlyList<SectorProblem> Problems)
+{
+    public static VerifySummary From(VerifyComparison c) => new(c.Total, c.Matched,
+        c.Count(SectorVerdict.Differs), c.Count(SectorVerdict.UnreadableOnDisk), c.Count(SectorVerdict.NotInImage), [.. c.Problems]);
+}
 
 public sealed record JobRecord
 {
@@ -53,6 +61,9 @@ public sealed record JobRecord
 
     /// <summary>Format that better fits the disk, when sectors fell outside the selected one.</summary>
     public string? SuggestedProfileId { get; init; }
+
+    /// <summary>Set on verify jobs that got as far as comparing sectors.</summary>
+    public VerifySummary? Verify { get; init; }
     public string? LogPath { get; init; }
     public string AppVersion { get; init; } = typeof(JobRecord).Assembly.GetName().Version?.ToString() ?? "0";
 }

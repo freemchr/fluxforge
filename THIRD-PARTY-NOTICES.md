@@ -9,6 +9,9 @@ FluxForge itself is licensed under the [MIT License](LICENSE). It includes the f
 | CommunityToolkit.Mvvm | MIT | https://github.com/CommunityToolkit/dotnet |
 | Microsoft.Extensions.DependencyInjection | MIT | https://github.com/dotnet/runtime |
 | Velopack | MIT | https://github.com/velopack/velopack |
+| Microsoft.Data.Sqlite | MIT | https://github.com/dotnet/efcore |
+| SQLitePCLRaw | Apache-2.0 | https://github.com/ericsink/SQLitePCL.raw |
+| SQLite | Public domain | https://sqlite.org/copyright.html |
 
 ## Greaseweazle
 

@@ -1,0 +1,4 @@
+{
+  "source": "converted.adf (gw convert of the worn Amiga raw capture), cylinder 12, side 0, sector 1",
+  "note": "gw 1.23 fills sectors it could not decode with this 512-byte pattern ('-=[BAD SECTOR]=-' repeated). Filler only, no disk content."
+}

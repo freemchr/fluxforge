@@ -8,7 +8,7 @@ public sealed class FormatRegistry
 {
     public static readonly IReadOnlyList<DiskProfile> BuiltIn =
     [
-        new("amiga-dd", "Commodore Amiga", "AmigaDOS DD 880 KB", "amiga.amigados", ".adf", 80, 2, 11, 512),
+        new("amiga-dd", "Commodore Amiga", "AmigaDOS DD 880 KB", "amiga.amigados", ".adf", 80, 2, 11, 512, FirstSector: 0),
         new("atarist-720", "Atari ST", "Double-sided 720 KB (9 sectors)", "atarist.720", ".st", 80, 2, 9, 512),
         new("atarist-360", "Atari ST", "Single-sided 360 KB (9 sectors)", "atarist.360", ".st", 80, 1, 9, 512),
         new("atarist-800", "Atari ST", "Double-sided 800 KB (10 sectors)", "atarist.800", ".st", 80, 2, 10, 512),
@@ -17,7 +17,7 @@ public sealed class FormatRegistry
         new("ibm-720", "IBM PC", "3.5\" DD 720 KB", "ibm.720", ".img", 80, 2, 9, 512),
         // 1541 disks use zoned recording (17-21 sectors/track); 683 sectors = 174,848-byte D64.
         new("c64-1541", "Commodore 64", "1541 single-sided (35 tracks)", "commodore.1541", ".d64", 35, 1, 19, 256,
-            KnownTotalSectors: 683),
+            KnownTotalSectors: 683, FirstSector: 0),
     ];
 
     public IReadOnlyList<DiskProfile> Profiles { get; }

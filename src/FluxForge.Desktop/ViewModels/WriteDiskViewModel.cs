@@ -20,9 +20,10 @@ public sealed partial class WriteDiskViewModel : ObservableObject, IPageLifecycl
     private readonly ISettingsStore _settings;
     private readonly IDialogService _dialogs;
     private readonly INavigator _navigator;
+    private readonly VerifyViewModel _verify;
     private CancellationTokenSource? _cts;
 
-    public WriteDiskViewModel(AppState state, JobRunner jobs, FormatRegistry formats, ISettingsStore settings, IDialogService dialogs, INavigator navigator)
+    public WriteDiskViewModel(AppState state, JobRunner jobs, FormatRegistry formats, ISettingsStore settings, IDialogService dialogs, INavigator navigator, VerifyViewModel verify)
     {
         State = state;
         _jobs = jobs;
@@ -30,6 +31,7 @@ public sealed partial class WriteDiskViewModel : ObservableObject, IPageLifecycl
         _settings = settings;
         _dialogs = dialogs;
         _navigator = navigator;
+        _verify = verify;
         Drive = settings.Load().Drive;
         state.PropertyChanged += (_, _) => Refresh();
     }
@@ -151,6 +153,15 @@ public sealed partial class WriteDiskViewModel : ObservableObject, IPageLifecycl
 
     [RelayCommand]
     private void ReadOriginalFirst() => _navigator.Navigate(Pages.Read);
+
+    /// <summary>Independent check: read the disk back and compare it with the image that was just written.</summary>
+    [RelayCommand]
+    private void VerifyAgainstImage()
+    {
+        if (ImageFile is not { } file) return;
+        _verify.Prefill(file, SelectedProfile?.Profile);
+        _navigator.Navigate(Pages.Verify);
+    }
 
     private bool CanWrite => !IsRunning && BlockedReason is null;
 

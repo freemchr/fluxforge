@@ -1,0 +1,161 @@
+<UserControl x:Class="FluxForge.Desktop.Views.LibraryView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+             xmlns:vm="clr-namespace:FluxForge.Desktop.ViewModels"
+             xmlns:lib="clr-namespace:FluxForge.Application.Library;assembly=FluxForge.Application"
+             mc:Ignorable="d"
+             d:DataContext="{d:DesignInstance vm:LibraryViewModel}">
+    <Grid Margin="16,12,16,12">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="360" />
+            <ColumnDefinition Width="14" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <DockPanel Grid.ColumnSpan="3" Margin="0,0,0,12">
+            <ui:Button DockPanel.Dock="Right" Content="Add images…" Icon="{ui:SymbolIcon Add24}" Command="{Binding AddFilesCommand}"
+                       VerticalAlignment="Bottom" Margin="0,0,18,0" />
+            <StackPanel>
+                <TextBlock Text="Library" Style="{StaticResource FfPageTitle}" />
+                <TextBlock Style="{StaticResource FfSubtitle}"
+                           Text="Your disks and their images. Reads and decodes are added automatically; files stay where you saved them." />
+            </StackPanel>
+        </DockPanel>
+
+        <!-- Disk list -->
+        <DockPanel Grid.Row="1">
+            <DockPanel DockPanel.Dock="Top" Margin="0,0,0,6">
+                <ui:Button DockPanel.Dock="Right" Icon="{ui:SymbolIcon ArrowSync24}" Command="{Binding LoadCommand}" Margin="8,0,0,0"
+                           ToolTip="Refresh" AutomationProperties.Name="Refresh library" />
+                <ui:TextBox PlaceholderText="Search title, system, tags, notes, file or SHA-256" Text="{Binding Search, UpdateSourceTrigger=PropertyChanged}"
+                            AutomationProperties.Name="Search library" />
+            </DockPanel>
+            <TextBlock DockPanel.Dock="Top" Text="{Binding Summary}" Style="{StaticResource FfSubtitle}" Margin="2,0,0,6" />
+            <Grid>
+                <ListBox ItemsSource="{Binding Disks}" SelectedItem="{Binding Selected}" ItemContainerStyle="{StaticResource FfNavItem}"
+                         AutomationProperties.Name="Disks">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate DataType="{x:Type lib:LibraryDisk}">
+                            <StackPanel Margin="0,3">
+                                <TextBlock Text="{Binding Title}" TextTrimming="CharacterEllipsis" FontWeight="SemiBold"
+                                           Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
+                                <TextBlock FontSize="11" Foreground="{DynamicResource TextFillColorSecondaryBrush}" TextTrimming="CharacterEllipsis">
+                                    <Run Text="{Binding System, Mode=OneWay, TargetNullValue='System not set'}" />
+                                    <Run Text="·" />
+                                    <Run Text="{Binding Images.Count, Mode=OneWay}" /><Run Text=" image(s)" />
+                                    <Run Text="·" />
+                                    <Run Text="{Binding UpdatedAt, Converter={StaticResource LocalTime}, StringFormat='{}{0:d MMM yyyy}', Mode=OneWay}" />
+                                </TextBlock>
+                            </StackPanel>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+                <Border Style="{StaticResource FfCard}" VerticalAlignment="Top" Visibility="{Binding IsEmpty, Converter={StaticResource VisibleWhen}}">
+                    <StackPanel>
+                        <TextBlock Text="No disks yet" Style="{StaticResource FfSectionHeader}" />
+                        <TextBlock Style="{StaticResource FfBody}" TextWrapping="Wrap"
+                                   Text="Disks appear here automatically when you read or decode them. You can also add image files you already have with Add images." />
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </DockPanel>
+
+        <!-- Selected disk -->
+        <ScrollViewer Grid.Row="1" Grid.Column="2" VerticalScrollBarVisibility="Auto">
+            <StackPanel Margin="0,0,18,24" Visibility="{Binding Selected, Converter={StaticResource VisibleWhen}}">
+                <Border Style="{StaticResource FfCard}">
+                    <StackPanel>
+                        <DockPanel>
+                            <ui:Button DockPanel.Dock="Right" Content="Remove from Library…" Appearance="Transparent" Icon="{ui:SymbolIcon Delete24}"
+                                       Command="{Binding RemoveDiskCommand}" />
+                            <TextBlock Text="Disk details" Style="{StaticResource FfSectionHeader}" VerticalAlignment="Center" />
+                        </DockPanel>
+                        <TextBlock Text="Title" Style="{StaticResource FfLabel}" />
+                        <ui:TextBox Text="{Binding EditTitle, UpdateSourceTrigger=PropertyChanged}" AutomationProperties.Name="Title" />
+                        <Grid Margin="0,0,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="12" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <StackPanel>
+                                <TextBlock Text="System" Style="{StaticResource FfLabel}" />
+                                <ComboBox ItemsSource="{Binding Systems}" Text="{Binding EditSystem, UpdateSourceTrigger=PropertyChanged}" IsEditable="True"
+                                          AutomationProperties.Name="System" />
+                            </StackPanel>
+                            <StackPanel Grid.Column="2">
+                                <TextBlock Text="Condition" Style="{StaticResource FfLabel}" />
+                                <ComboBox ItemsSource="{Binding Conditions}" SelectedItem="{Binding EditCondition}" DisplayMemberPath="Label"
+                                          AutomationProperties.Name="Condition" />
+                            </StackPanel>
+                        </Grid>
+                        <TextBlock Text="Tags (separate with commas)" Style="{StaticResource FfLabel}" />
+                        <ui:TextBox Text="{Binding EditTags, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="e.g. game, original, Psygnosis"
+                                    AutomationProperties.Name="Tags" />
+                        <TextBlock Text="Notes" Style="{StaticResource FfLabel}" />
+                        <ui:TextBox Text="{Binding EditNotes, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True" TextWrapping="Wrap"
+                                    MinHeight="70" VerticalContentAlignment="Top" PlaceholderText="Label text, where it came from, condition details…"
+                                    AutomationProperties.Name="Notes" />
+                        <WrapPanel Margin="0,10,0,0">
+                            <ui:Button Appearance="Primary" Content="Save changes" Icon="{ui:SymbolIcon Save24}" Command="{Binding SaveCommand}" Margin="0,0,8,0" />
+                            <ui:Button Content="Undo" Command="{Binding RevertCommand}"
+                                       Visibility="{Binding IsDirty, Converter={StaticResource VisibleWhen}}" />
+                        </WrapPanel>
+                    </StackPanel>
+                </Border>
+
+                <Border Style="{StaticResource FfCard}">
+                    <StackPanel>
+                        <DockPanel Margin="0,0,0,6">
+                            <ui:Button DockPanel.Dock="Right" Content="Check files" Icon="{ui:SymbolIcon ShieldCheckmark24}" Command="{Binding CheckFilesCommand}"
+                                       ToolTip="Re-hash every image and compare with the SHA-256 recorded when it was catalogued" />
+                            <TextBlock Text="Images" Style="{StaticResource FfSectionHeader}" VerticalAlignment="Center" Margin="0" />
+                        </DockPanel>
+                        <ItemsControl ItemsSource="{Binding Images}" Focusable="False">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate DataType="{x:Type vm:LibraryImageRow}">
+                                    <Border Padding="12,10" Margin="0,4" CornerRadius="6" Background="{DynamicResource CardBackgroundFillColorSecondaryBrush}">
+                                        <StackPanel>
+                                            <TextBlock Text="{Binding FileName}" FontWeight="SemiBold" Style="{StaticResource FfBody}" TextTrimming="CharacterEllipsis" />
+                                            <TextBlock Text="{Binding Folder}" Style="{StaticResource FfSubtitle}" FontSize="12" TextTrimming="CharacterEllipsis" />
+                                            <TextBlock Text="{Binding Summary}" Style="{StaticResource FfBody}" FontSize="12" Margin="0,4,0,0" />
+                                            <TextBlock Text="{Binding Provenance}" Style="{StaticResource FfBody}" FontSize="12" />
+                                            <TextBlock Text="{Binding JobDetail}" Style="{StaticResource FfSubtitle}" FontSize="12" TextWrapping="Wrap"
+                                                       Visibility="{Binding JobDetail, Converter={StaticResource VisibleWhen}}" />
+                                            <TextBlock Text="{Binding VerifyText}" Foreground="{Binding VerifyBrush}" FontSize="12" TextWrapping="Wrap" Margin="0,2,0,0"
+                                                       Visibility="{Binding VerifyText, Converter={StaticResource VisibleWhen}}" />
+                                            <TextBox IsReadOnly="True" FontFamily="{StaticResource FfMonoFont}" FontSize="11" Margin="0,6,0,0"
+                                                     Text="{Binding Image.Sha256, StringFormat='SHA-256 {0}', Mode=OneWay}" AutomationProperties.Name="SHA-256" />
+                                            <TextBlock Text="{Binding Integrity}" Foreground="{Binding IntegrityBrush}" FontSize="12" TextWrapping="Wrap" Margin="0,4,0,0"
+                                                       Visibility="{Binding Integrity, Converter={StaticResource VisibleWhen}}" />
+                                            <WrapPanel Margin="0,8,0,0">
+                                                <ui:Button Content="Show file" Icon="{ui:SymbolIcon FolderOpen24}" Margin="0,0,6,6"
+                                                           Command="{Binding DataContext.ShowFileCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}" />
+                                                <ui:Button Content="Verify disk against this" Icon="{ui:SymbolIcon CheckmarkCircle24}" Margin="0,0,6,6"
+                                                           Command="{Binding DataContext.VerifyDiskCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}" />
+                                                <ui:Button Content="Decode in Image Studio" Icon="{ui:SymbolIcon Image24}" Margin="0,0,6,6"
+                                                           Visibility="{Binding IsRaw, Converter={StaticResource VisibleWhen}}"
+                                                           Command="{Binding DataContext.DecodeCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}" />
+                                                <ui:Button Content="Write to a disk…" Icon="{ui:SymbolIcon ArrowUpload24}" Margin="0,0,6,6"
+                                                           Command="{Binding DataContext.WriteDiskCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}" />
+                                                <ui:Button Content="Remove" Appearance="Transparent" Margin="0,0,6,6"
+                                                           Command="{Binding DataContext.RemoveImageCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}" />
+                                            </WrapPanel>
+                                        </StackPanel>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</UserControl>

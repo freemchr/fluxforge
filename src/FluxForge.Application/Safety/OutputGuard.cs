@@ -58,6 +58,26 @@ public static class OutputGuard
         return issues;
     }
 
+    /// <summary>
+    /// A verify reference must be a sector image of exactly the chosen format's size (sectors are compared
+    /// by position), or a raw capture that is decoded with that format first.
+    /// </summary>
+    public static IReadOnlyList<SafetyIssue> CheckVerifyImage(string imagePath, DiskProfile? profile)
+    {
+        if (!File.Exists(imagePath))
+            return [new(true, "Image file not found.")];
+        var ext = Path.GetExtension(imagePath);
+        if (profile is null)
+            return [new(true, "Choose the disk format. FluxForge won't guess from the file extension.")];
+        if (GwCommands.RawFluxExtensions.Contains(ext))
+            return [];
+        if (!string.Equals(ext, profile.SectorExtension, StringComparison.OrdinalIgnoreCase))
+            return [new(true, $"{profile.DisplayName} expects a {profile.SectorExtension} image, not {ext}.")];
+        var size = new FileInfo(imagePath).Length;
+        return size == profile.ExpectedSectorImageBytes ? []
+            : [new(true, $"Image is {size:N0} bytes; {profile.DisplayName} is {profile.ExpectedSectorImageBytes:N0} bytes, so sectors can't be compared. Check the format.")];
+    }
+
     /// <summary>Returns "name (INCOMPLETE).ext", "name (INCOMPLETE 2).ext", ... that does not yet exist.</summary>
     public static string IncompleteName(string finalPath)
     {

@@ -14,7 +14,7 @@ installs and updates those tools for you, detects your board, shows a live track
 and tells you the truth about every disk: what was recovered, what wasn't, and why.
 
 > FluxForge is an independent project and is not affiliated with the Greaseweazle project.
-> Status: **preview**, tested on a Greaseweazle V4.1 with a 3.5" PC floppy drive.
+> Version 1.0, tested on a Greaseweazle V4.1 with a 3.5" PC floppy drive.
 
 ## Why FluxForge?
 
@@ -27,12 +27,18 @@ and tells you the truth about every disk: what was recovered, what wasn't, and w
 - **Catches the wrong format.** If a disk holds sectors your chosen format doesn't define (such as
   an Atari ST 800K, 10-sector disk read as 720K), FluxForge says so and suggests the right format,
   instead of silently dropping data.
+- **Check a disk against an image.** Verify reads a disk and compares every sector with an image,
+  and tells apart sectors that differ from sectors the drive couldn't read.
+- **A catalogue of your collection.** Every disk you read lands in the Library with its SHA-256
+  fingerprints, where it came from and how it went, ready to search, tag and re-check.
 - **Recover without touching the disk again.** Decode any saved raw capture into a sector image with
   a different format in Image Studio. Fragile disks only need to be read once.
 
 ## Screenshots
 
-<p align="center"><img src="docs/screenshots/drive-tools.png" alt="FluxForge Drive Tools: drive speed 299.63 RPM, USB bandwidth test and head controls" width="820"></p>
+<p align="center"><img src="docs/screenshots/home.png" alt="FluxForge home screen: host tools ready, Greaseweazle V4.1 connected, quick actions and recent activity" width="820"></p>
+
+Every feature below has its own screenshot, all taken from real runs on a Greaseweazle V4.1.
 
 ## Features
 
@@ -44,16 +50,49 @@ and tells you the truth about every disk: what was recovered, what wasn't, and w
 - **SHA-256 fingerprint** of every image, and a full job log with the exact `gw` command and output.
 - **Never overwrites a file.** Cancelled or failed reads are kept and clearly labelled `(INCOMPLETE)`.
 
+<p align="center"><img src="docs/screenshots/read.png" alt="FluxForge Read Disk: raw flux capture of an Amiga disk in progress, live track map and gw output" width="820"></p>
+
 ### Write disk images to floppy
 - Guarded write flow: choose the format explicitly for ambiguous images, tick an overwrite
   acknowledgement, then confirm.
 - Verification is on by default, and the track map animates as each track is written and verified.
 - Interrupted writes are reported as "disk state unknown", never as success.
 
+<p align="center"><img src="docs/screenshots/write.png" alt="FluxForge Write Disk: image and format chosen, overwrite acknowledgement required before writing" width="820"></p>
+
+### Verify a disk against an image
+- Reads the disk and compares it **sector by sector** with an `.adf` / `.st` / `.img` / `.d64` image,
+  or with a raw `.scp` capture (decoded with your chosen format first).
+- The track map marks each track as matching, different, unreadable, or not comparable because the
+  image itself has no data there (sectors that were unreadable when the image was made).
+- Lists every problem sector by cylinder, side and sector number. Read only: nothing is written to
+  the disk, and the readback is deleted once compared.
+- One click from the Write result: "Verify against this image".
+
+<p align="center"><img src="docs/screenshots/verify.png" alt="FluxForge Verify: a real Amiga disk compared sector by sector with an image, three differing sectors shown on the track map" width="820"></p>
+
+### Library: catalogue your disks
+- Every successful read and decode is **added automatically**, with the job that made it (date,
+  result, format). A decode joins the disk its raw capture came from. Existing history is imported
+  the first time you open the Library.
+- Give each disk a title, system, **condition** (good, worn, damaged), **tags** and notes, and
+  search across all of them, plus file names and SHA-256 fingerprints.
+- **Check files** re-hashes images and tells you if one has changed or gone missing since it was
+  catalogued. Verify results are recorded against the image they were compared with.
+- Add images you already have. A capture and an image with the same name in the same folder are
+  kept together as one disk.
+- One click to verify a disk against an image, write it, or decode a capture in Image Studio.
+- Images stay where you saved them; the Library (a local SQLite file) only stores paths, hashes and
+  your notes. Removing an entry never deletes a file.
+
+<p align="center"><img src="docs/screenshots/library.png" alt="FluxForge Library: a catalogued Amiga disk with condition, tags and notes, and its images" width="820"></p>
+
 ### Image Studio: decode raw flux captures
 - Turn an existing `.scp` flux capture into an `.adf` / `.st` / `.img` / `.d64` image with any
   supported format.
 - One-click "Decode as …" when FluxForge detects that a different format fits the capture better.
+
+<p align="center"><img src="docs/screenshots/image-studio.png" alt="FluxForge Image Studio: a raw SCP capture decoded to an ADF with every sector recovered" width="820"></p>
 
 ### Greaseweazle host tools manager
 - Installs the official Windows release from GitHub after you approve it, with HTTPS-only download,
@@ -62,6 +101,8 @@ and tells you the truth about every disk: what was recovered, what wasn't, and w
   installing or switching to **older Greaseweazle versions** if you depend on one.
 - Use your own existing `gw.exe` instead, or import a downloaded ZIP offline.
 
+<p align="center"><img src="docs/screenshots/settings.png" alt="FluxForge Settings: managed Greaseweazle host tools with installed versions and the COM port in use" width="820"></p>
+
 ### Drive Tools
 - **Drive speed check** (RPM) with a plain-language health verdict.
 - **USB bandwidth test** between the PC and the Greaseweazle.
@@ -69,12 +110,16 @@ and tells you the truth about every disk: what was recovered, what wasn't, and w
 - **Head cleaning** with a cleaning disk, and **disk erase**, both behind clear confirmations.
 - Every tool run is recorded in Activity.
 
+<p align="center"><img src="docs/screenshots/drive-tools.png" alt="FluxForge Drive Tools: drive speed 299.76 RPM, USB bandwidth test and head controls" width="820"></p>
+
 ### Device and diagnostics
 - Shows host tools, device and firmware as separate statuses (for example "Greaseweazle V4.1 on COM6,
   firmware 1.6").
 - Plain-language help for common hardware errors, such as "Track 0 not found" (a straight cable
   usually means drive **B**).
 - Activity history with searchable jobs and exportable text reports (with optional path redaction).
+
+<p align="center"><img src="docs/screenshots/activity.png" alt="FluxForge Activity: job history with a full job report and track map, folder paths redacted" width="820"></p>
 
 ## Supported disk formats
 

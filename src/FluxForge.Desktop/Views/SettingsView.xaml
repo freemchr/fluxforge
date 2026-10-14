@@ -59,7 +59,7 @@
                                         </StackPanel>
                                         <TextBlock VerticalAlignment="Center" Style="{StaticResource FfBody}">
                                             <Run Text="{Binding Version, Mode=OneWay}" FontWeight="SemiBold" />
-                                            <Run Text="  ● in use" Foreground="{StaticResource FfSuccessBrush}">
+                                            <Run Foreground="{StaticResource FfSuccessBrush}">
                                                 <Run.Style>
                                                     <Style TargetType="Run">
                                                         <Setter Property="Text" Value="" />
@@ -125,8 +125,22 @@
                     <TextBlock Text="COM port (leave empty to let gw find the board)" Style="{StaticResource FfLabel}" Margin="0,0,0,4" />
                     <DockPanel>
                         <ui:Button DockPanel.Dock="Right" Content="Save and detect" Command="{Binding SaveDevicePortCommand}" Margin="8,0,0,0" />
-                        <TextBox Text="{Binding DevicePort, UpdateSourceTrigger=PropertyChanged}" AutomationProperties.Name="COM port" />
+                        <ui:TextBox Text="{Binding DevicePort, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="Automatic" AutomationProperties.Name="COM port" />
                     </DockPanel>
+                    <TextBlock Style="{StaticResource FfBody}" Margin="0,8,0,0" AutomationProperties.LiveSetting="Polite">
+                        <Run Text="In use:" />
+                        <Run Text="{Binding State.Device.Info.Port, Mode=OneWay, TargetNullValue='no Greaseweazle detected', FallbackValue='no Greaseweazle detected'}" FontWeight="SemiBold" />
+                        <Run Foreground="{DynamicResource TextFillColorSecondaryBrush}">
+                            <Run.Style>
+                                <Style TargetType="Run">
+                                    <Setter Property="Text" Value="{Binding PortSource, Mode=OneWay}" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding State.Device.Info}" Value="{x:Null}"><Setter Property="Text" Value="" /></DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Run.Style>
+                        </Run>
+                    </TextBlock>
                     <TextBlock Style="{StaticResource FfSubtitle}" FontSize="12" Margin="0,8,0,0"
                                Text="On Windows 10 and 11 the Greaseweazle normally appears as a USB serial (COM) device with the built-in driver. FluxForge never installs drivers. Firmware updates will be offered only through the Drive Tools firmware assistant, always with explicit confirmation." />
                 </StackPanel>

@@ -1,0 +1,160 @@
+<UserControl x:Class="FluxForge.Desktop.Views.VerifyView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+             xmlns:vm="clr-namespace:FluxForge.Desktop.ViewModels"
+             xmlns:v="clr-namespace:FluxForge.Desktop.Views"
+             xmlns:safety="clr-namespace:FluxForge.Application.Safety;assembly=FluxForge.Application"
+             mc:Ignorable="d"
+             d:DataContext="{d:DesignInstance vm:VerifyViewModel}">
+    <Grid Margin="16,12,16,0">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="380" />
+            <ColumnDefinition Width="14" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <ScrollViewer VerticalScrollBarVisibility="Auto">
+            <StackPanel Margin="0,0,18,24" IsEnabled="{Binding IsRunning, Converter={StaticResource Not}}">
+                <TextBlock Text="Verify" Style="{StaticResource FfPageTitle}" />
+                <TextBlock Text="Read a disk and compare it sector by sector with an image. Nothing is written to the disk." Style="{StaticResource FfSubtitle}" Margin="0,0,0,10" />
+
+                <Border Style="{StaticResource FfCard}">
+                    <StackPanel>
+                        <TextBlock Text="1 · Image to compare with" Style="{StaticResource FfSectionHeader}" />
+                        <DockPanel>
+                            <ui:Button DockPanel.Dock="Right" Content="Browse…" Command="{Binding BrowseImageCommand}" Margin="8,0,0,0" />
+                            <ui:TextBox Text="{Binding ImagePath, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="Browse, or paste the path to an image"
+                                        AutomationProperties.Name="Image file" />
+                        </DockPanel>
+                        <TextBlock Text="{Binding ImageSummary}" Style="{StaticResource FfSubtitle}" Margin="0,6,0,0" />
+                        <TextBlock Style="{StaticResource FfSubtitle}" Margin="0,6,0,0" TextWrapping="Wrap"
+                                   Text="Sector images (.adf, .st, .img, .d64) or a raw capture (.scp), which is decoded first with the format below." />
+                    </StackPanel>
+                </Border>
+
+                <Border Style="{StaticResource FfCard}">
+                    <StackPanel>
+                        <TextBlock Text="2 · Format and drive" Style="{StaticResource FfSectionHeader}" />
+                        <ComboBox ItemsSource="{Binding ProfileChoices}" SelectedItem="{Binding SelectedProfile}" AutomationProperties.Name="Disk format">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate DataType="{x:Type vm:ProfileOption}">
+                                    <StackPanel>
+                                        <TextBlock Text="{Binding Title}" />
+                                        <TextBlock Text="{Binding Detail}" FontSize="11" Foreground="{DynamicResource TextFillColorTertiaryBrush}" />
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+                        <TextBlock Text="Drive" Style="{StaticResource FfLabel}" />
+                        <ComboBox ItemsSource="{Binding Drives}" SelectedItem="{Binding Drive}" Width="120" HorizontalAlignment="Left" AutomationProperties.Name="Drive" />
+                    </StackPanel>
+                </Border>
+
+                <ItemsControl ItemsSource="{Binding Issues}" Focusable="False" Margin="0,0,0,8">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate DataType="{x:Type safety:SafetyIssue}">
+                            <TextBlock Style="{StaticResource FfBody}" FontSize="12" Margin="0,2">
+                                <Run Text="⚠ " Foreground="{StaticResource FfWarningBrush}" /><Run Text="{Binding Message, Mode=OneWay}" />
+                            </TextBlock>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+
+                <TextBlock Text="Command preview" Style="{StaticResource FfLabel}" />
+                <TextBox Text="{Binding CommandPreview, Mode=OneWay}" IsReadOnly="True" TextWrapping="Wrap"
+                         FontFamily="{StaticResource FfMonoFont}" FontSize="12" AutomationProperties.Name="Command preview" />
+                <TextBlock Style="{StaticResource FfSubtitle}" Margin="0,6,0,0" TextWrapping="Wrap"
+                           Text="The disk is read into a temporary file, compared, then the temporary file is deleted." />
+            </StackPanel>
+        </ScrollViewer>
+
+        <DockPanel Grid.Column="2">
+            <Border DockPanel.Dock="Top" Style="{StaticResource FfCard}" Margin="0,0,18,8">
+                <StackPanel>
+                    <WrapPanel>
+                        <ui:Button Appearance="Primary" Content="Verify disk" Icon="{ui:SymbolIcon CheckmarkCircle24}" Height="34" MinWidth="140"
+                                   Command="{Binding VerifyCommand}" Margin="0,0,8,0" />
+                        <ui:Button Content="Cancel" Icon="{ui:SymbolIcon Stop24}" Height="34" Command="{Binding CancelCommand}" />
+                    </WrapPanel>
+                    <TextBlock Text="{Binding BlockedReason}" Style="{StaticResource FfSubtitle}" Margin="0,8,0,0"
+                               Visibility="{Binding BlockedReason, Converter={StaticResource VisibleWhen}}" />
+                </StackPanel>
+            </Border>
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                <StackPanel Margin="0,0,18,24">
+                    <Border Style="{StaticResource FfCard}">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <StackPanel>
+                                <TextBlock FontSize="17" FontWeight="SemiBold" AutomationProperties.LiveSetting="Polite">
+                                    <Run Text="{Binding Console.Status, Converter={StaticResource Status}, ConverterParameter=glyph, Mode=OneWay}"
+                                         Foreground="{Binding Console.Status, Converter={StaticResource Status}, ConverterParameter=brush, Mode=OneWay}" />
+                                    <Run Text="{Binding Console.Status, Converter={StaticResource Status}, Mode=OneWay}" Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
+                                </TextBlock>
+                                <TextBlock Text="{Binding Console.CurrentTrack}" Style="{StaticResource FfSubtitle}" />
+                            </StackPanel>
+                            <TextBlock Grid.Column="1" Text="{Binding Console.Elapsed}" FontSize="17" FontFamily="{StaticResource FfMonoFont}"
+                                       Foreground="{DynamicResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" />
+                        </Grid>
+                    </Border>
+
+                    <Border Style="{StaticResource FfCard}" Visibility="{Binding LastResult, Converter={StaticResource VisibleWhen}}"
+                            BorderBrush="{Binding LastResult.Status, Converter={StaticResource Status}, ConverterParameter=brush}">
+                        <StackPanel>
+                            <TextBlock Text="Result" Style="{StaticResource FfSectionHeader}" />
+                            <TextBlock Text="{Binding LastResult.StatusDetail}" Style="{StaticResource FfBody}" Margin="0,0,0,8" />
+                            <TextBlock Style="{StaticResource FfBody}" FontWeight="SemiBold" Foreground="{StaticResource FfSimulatedBrush}"
+                                       Text="Simulated run — no real disk was involved."
+                                       Visibility="{Binding LastResult.Simulated, Converter={StaticResource VisibleWhen}}" />
+                            <WrapPanel Visibility="{Binding Comparison, Converter={StaticResource VisibleWhen}}" Margin="0,0,0,4">
+                                <TextBlock Style="{StaticResource FfBody}" Margin="0,0,18,0">
+                                    <Run Text="= " Foreground="{StaticResource FfSuccessBrush}" /><Run Text="{Binding Comparison.Matched, Mode=OneWay, StringFormat=N0}" /><Run Text=" match" />
+                                </TextBlock>
+                                <TextBlock Style="{StaticResource FfBody}" Margin="0,0,18,0">
+                                    <Run Text="≠ " Foreground="{StaticResource FfErrorBrush}" /><Run Text="{Binding Comparison.Differs, Mode=OneWay, StringFormat=N0}" /><Run Text=" differ" />
+                                </TextBlock>
+                                <TextBlock Style="{StaticResource FfBody}" Margin="0,0,18,0">
+                                    <Run Text="✕ " Foreground="{StaticResource FfErrorBrush}" /><Run Text="{Binding Comparison.UnreadableOnDisk, Mode=OneWay, StringFormat=N0}" /><Run Text=" unreadable" />
+                                </TextBlock>
+                                <TextBlock Style="{StaticResource FfBody}">
+                                    <Run Text="? " Foreground="{StaticResource FfWarningBrush}" /><Run Text="{Binding Comparison.NotInImage, Mode=OneWay, StringFormat=N0}" /><Run Text=" not in image" />
+                                </TextBlock>
+                            </WrapPanel>
+                            <ItemsControl ItemsSource="{Binding ProblemLines}" Focusable="False" Margin="0,6,0,0">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding}" FontFamily="{StaticResource FfMonoFont}" FontSize="12" Margin="0,1"
+                                                   Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                            <TextBlock Text="{Binding MoreProblems}" Style="{StaticResource FfSubtitle}"
+                                       Visibility="{Binding MoreProblems, Converter={StaticResource VisibleWhen}}" />
+                        </StackPanel>
+                    </Border>
+
+                    <Border Style="{StaticResource FfCard}">
+                        <StackPanel>
+                            <TextBlock Text="Track map" Style="{StaticResource FfSectionHeader}" />
+                            <v:TrackMapView DataContext="{Binding TrackMap}" />
+                        </StackPanel>
+                    </Border>
+
+                    <Border Style="{StaticResource FfCard}">
+                        <StackPanel>
+                            <TextBlock Text="Console output (exact gw output, also saved to the job log)" Style="{StaticResource FfSectionHeader}" />
+                            <TextBox Style="{StaticResource FfLogBox}" Height="180" Text="{Binding Console.LogText, Mode=OneWay}"
+                                     AutomationProperties.Name="Console output" TextChanged="ScrollToEnd" />
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </ScrollViewer>
+        </DockPanel>
+    </Grid>
+</UserControl>

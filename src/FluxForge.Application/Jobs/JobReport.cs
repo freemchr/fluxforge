@@ -36,7 +36,9 @@ public static class JobReport
         Line("Firmware", r.Firmware);
         Line("Arguments", string.Join(' ', r.Arguments.Select(a => redactPaths && Path.IsPathFullyQualified(a) ? Path.GetFileName(a) : a)));
         Line("Exit code", r.ExitCode);
-        if (r.Sectors is { } s) Line("Sectors", $"{s.Found:N0} of {s.Total:N0} decoded");
+        if (r.Verify is { } v)
+            Line("Comparison", $"{v.Matched:N0} of {v.Total:N0} sectors match; {v.Differs:N0} differ, {v.UnreadableOnDisk:N0} unreadable on disk, {v.NotInImage:N0} not in image");
+        else if (r.Sectors is { } s) Line("Sectors", $"{s.Found:N0} of {s.Total:N0} decoded");
 
         if (r.Artifacts.Count > 0)
         {
@@ -46,11 +48,11 @@ public static class JobReport
                   .Append(CultureInfo.InvariantCulture, $"    {a.Kind}, {a.Bytes:N0} bytes, SHA-256 {a.Sha256}").AppendLine();
         }
 
-        var problems = r.Tracks.Where(t => t.Status is not (TrackStatus.DecodedOk or TrackStatus.FluxCapturedDecodeUnknown)).ToList();
+        var problems = r.Tracks.Where(t => t.Status is not (TrackStatus.DecodedOk or TrackStatus.FluxCapturedDecodeUnknown or TrackStatus.Verified or TrackStatus.Match)).ToList();
         sb.AppendLine().Append(CultureInfo.InvariantCulture, $"Tracks observed: {r.Tracks.Count}, needing attention: {problems.Count}").AppendLine();
         foreach (var t in problems)
             sb.Append(CultureInfo.InvariantCulture,
-                $"  T{t.Cylinder}.{t.Head}: {t.Status}{(t.SectorsTotal is { } tot ? $" ({t.SectorsFound}/{tot} sectors)" : "")}{(t.Retries > 0 ? $", {t.Retries} retries" : "")}").AppendLine();
+                $"  T{t.Cylinder}.{t.Head}: {t.Status}{(t.SectorsTotal is { } tot ? $" ({t.SectorsFound}/{tot} sectors)" : "")}{(t.Retries > 0 ? $", {t.Retries} retries" : "")}{(t.Detail is { } d ? $": {d}" : "")}").AppendLine();
         return sb.ToString();
     }
 }

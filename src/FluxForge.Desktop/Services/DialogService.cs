@@ -7,6 +7,7 @@ public interface IDialogService
 {
     string? PickFolder(string title, string? initial);
     string? PickFile(string title, string filter, string? initial = null);
+    IReadOnlyList<string> PickFiles(string title, string filter);
     string? SaveFile(string title, string filter, string fileName);
     Task<bool> ConfirmAsync(string title, string message, string confirmText);
     Task AlertAsync(string title, string message);
@@ -24,6 +25,12 @@ public sealed class DialogService : IDialogService
     {
         var dialog = new OpenFileDialog { Title = title, Filter = filter, InitialDirectory = initial ?? "", CheckFileExists = true };
         return dialog.ShowDialog() == true ? dialog.FileName : null;
+    }
+
+    public IReadOnlyList<string> PickFiles(string title, string filter)
+    {
+        var dialog = new OpenFileDialog { Title = title, Filter = filter, CheckFileExists = true, Multiselect = true };
+        return dialog.ShowDialog() == true ? dialog.FileNames : [];
     }
 
     public string? SaveFile(string title, string filter, string fileName)

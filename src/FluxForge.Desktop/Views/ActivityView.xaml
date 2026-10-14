@@ -32,7 +32,8 @@
                 <ui:TextBox PlaceholderText="Search title, label, format or status" Text="{Binding Filter, UpdateSourceTrigger=PropertyChanged}"
                             AutomationProperties.Name="Search jobs" />
             </DockPanel>
-            <ListBox ItemsSource="{Binding Jobs}" SelectedItem="{Binding Selected}" AutomationProperties.Name="Job history">
+            <ListBox ItemsSource="{Binding Jobs}" SelectedItem="{Binding Selected}" AutomationProperties.Name="Job history"
+                     ItemContainerStyle="{StaticResource FfNavItem}">
                 <ListBox.ItemTemplate>
                     <DataTemplate DataType="{x:Type jobs:JobRecord}">
                         <Grid Margin="0,4">
