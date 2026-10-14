@@ -8,6 +8,7 @@ public static class AppLinks
     public const string Repository = "https://github.com/freemchr/fluxforge";
     public const string Issues = Repository + "/issues";
     public const string NewIssue = Repository + "/issues/new";
+    public const string BuyMeACoffee = "https://buymeacoffee.com/cjf077";
     public const string Greaseweazle = "https://github.com/keirf/greaseweazle";
     public const string GreaseweazleWiki = "https://github.com/keirf/greaseweazle/wiki";
 

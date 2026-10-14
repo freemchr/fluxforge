@@ -1,5 +1,7 @@
 <p align="center"><img src="assets/brand/fluxforge-logo.png" alt="FluxForge — Preserve the Past One Disk at a Time" width="720"></p>
 
+<p align="center"><a href="https://buymeacoffee.com/cjf077"><img src="https://img.shields.io/badge/Buy%20me%20a%20coffee-support%20FluxForge-FFDD00?logo=buymeacoffee&amp;logoColor=black" alt="Buy me a coffee"></a></p>
+
 # FluxForge
 
 Windows desktop app for imaging, writing and documenting floppy disks with a
@@ -59,6 +61,11 @@ dotnet run --project src/FluxForge.Desktop
 
 The fake prints a `FLUXFORGE-SIMULATED` marker; the app then shows **SIMULATED HARDWARE** and
 labels every job and report as simulated. Its "images" are placeholder bytes.
+
+## Support
+
+Found a bug or have an idea? [Open an issue](https://github.com/freemchr/fluxforge/issues).
+If FluxForge saved one of your disks, you can [buy me a coffee](https://buymeacoffee.com/cjf077) ☕
 
 ## Brand assets
 

@@ -164,7 +164,9 @@
                         <ui:Button Icon="{ui:SymbolIcon ChatHelp24}" Content="Known issues &amp; help" Command="{Binding OpenLinkCommand}"
                                    CommandParameter="https://github.com/freemchr/fluxforge/issues" Margin="0,0,8,0" />
                         <ui:Button Appearance="Transparent" Content="FluxForge on GitHub" Command="{Binding OpenLinkCommand}"
-                                   CommandParameter="https://github.com/freemchr/fluxforge" />
+                                   CommandParameter="https://github.com/freemchr/fluxforge" Margin="0,0,8,0" />
+                        <ui:Button Icon="{ui:SymbolIcon DrinkCoffee24}" Content="Buy me a coffee" Command="{Binding OpenLinkCommand}"
+                                   CommandParameter="https://buymeacoffee.com/cjf077" ToolTip="https://buymeacoffee.com/cjf077" />
                     </WrapPanel>
                     <TextBlock Style="{StaticResource FfSubtitle}" FontSize="12" Margin="0,0,0,8"
                                Text="When reporting a problem, attach the job report from Activity → Export report (tick “Redact folder paths” if you prefer)." />
