@@ -1,6 +1,6 @@
 # Third-party notices
 
-FluxForge includes the following open-source components. Each is used under its own license.
+FluxForge itself is licensed under the [MIT License](LICENSE). It includes the following open-source components. Each is used under its own license.
 
 | Component | License | Source |
 |---|---|---|

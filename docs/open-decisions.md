@@ -4,7 +4,7 @@ Decisions the PRD leaves open. Each needs an owner and an answer before the stag
 
 | # | Decision | Needed by | Current default in code |
 |---|---|---|---|
-| D1 | **License and business model**: open source (which license?) or closed? Drives GPL caution (§12), bundling terms and signing budget. | Before first public build | None — repo is private, no license file |
+| D1 | ~~License and business model~~ **Decided (14 Oct 2026): open source, MIT License.** Free app, optional Buy Me a Coffee. | Done | `LICENSE` |
 | D2 | **Code-signing certificate** (OV/EV or Azure Trusted Signing) and budget. Unsigned builds trigger SmartScreen. | Beta | Unsigned |
 | D3 | **Installer technology**: Velopack (recommended: per-user, delta updates, portable zip) vs MSIX vs WiX. | Phase 1 packaging | Not started |
 | D4 | **Firmware compatibility source** for FR-18: where does "compatible" come from? Hand-maintained table, upstream data, or show versions only? | Phase 2 | Versions shown only, no compatibility claim |

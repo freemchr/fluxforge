@@ -1,6 +1,6 @@
 <p align="center"><img src="assets/brand/fluxforge-logo.png" alt="FluxForge: Greaseweazle floppy disk imaging and preservation app for Windows" width="720"></p>
 
-<p align="center"><a href="https://buymeacoffee.com/cjf077"><img src="https://img.shields.io/badge/Buy%20me%20a%20coffee-support%20FluxForge-FFDD00?logo=buymeacoffee&amp;logoColor=black" alt="Buy me a coffee"></a></p>
+<p align="center"><a href="LICENSE"><img src="https://img.shields.io/github/license/freemchr/fluxforge" alt="MIT License"></a> <a href="https://github.com/freemchr/fluxforge/releases/latest"><img src="https://img.shields.io/github/v/release/freemchr/fluxforge" alt="Latest release"></a> <a href="https://buymeacoffee.com/cjf077"><img src="https://img.shields.io/badge/Buy%20me%20a%20coffee-support%20FluxForge-FFDD00?logo=buymeacoffee&amp;logoColor=black" alt="Buy me a coffee"></a></p>
 
 # FluxForge: Greaseweazle GUI for Windows for floppy disk imaging, flux preservation and recovery
 
@@ -130,3 +130,9 @@ Found a bug or have an idea? [Open an issue](https://github.com/freemchr/fluxfor
 Tried FluxForge with your own Greaseweazle? A quick [hardware test report](https://github.com/freemchr/fluxforge/issues/new?template=hardware_test_report.yml) helps a lot, even if everything worked.
 When reporting a problem, attach the job report from **Activity → Export report**.
 If FluxForge saved one of your disks, you can [buy me a coffee](https://buymeacoffee.com/cjf077) ☕
+
+## License
+
+FluxForge is free and open source under the [MIT License](LICENSE). It is provided as is, without
+warranty: always keep a raw capture of disks that matter before writing to them. Greaseweazle and the
+other components FluxForge uses keep their own licenses; see [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).
