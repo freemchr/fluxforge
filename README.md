@@ -1,6 +1,6 @@
 <p align="center"><img src="assets/brand/fluxforge-logo.png" alt="FluxForge: Greaseweazle floppy disk imaging and preservation app for Windows" width="720"></p>
 
-<p align="center"><a href="LICENSE"><img src="https://img.shields.io/github/license/freemchr/fluxforge" alt="MIT License"></a> <a href="https://github.com/freemchr/fluxforge/releases/latest"><img src="https://img.shields.io/github/v/release/freemchr/fluxforge" alt="Latest release"></a> <a href="https://buymeacoffee.com/cjf077"><img src="https://img.shields.io/badge/Buy%20me%20a%20coffee-support%20FluxForge-FFDD00?logo=buymeacoffee&amp;logoColor=black" alt="Buy me a coffee"></a></p>
+<p align="center"><a href="LICENSE"><img src="https://img.shields.io/github/license/freemchr/fluxforge" alt="MIT License"></a> <a href="https://github.com/freemchr/fluxforge/releases/latest"><img src="https://img.shields.io/github/v/release/freemchr/fluxforge" alt="Latest release"></a> <a href="https://buymeacoffee.com/cjf077"><img src="https://img.shields.io/badge/Buy%20me%20a%20coffee-support%20FluxForge-FFDD00?logo=buymeacoffee&amp;logoColor=black" alt="Buy me a coffee"></a> <a href="https://sourceping.app/github/freemchr/fluxforge"><img src="https://img.shields.io/badge/Discord-Get_release_alerts-5865F2?logo=discord&amp;logoColor=white" alt="Get release alerts in Discord"></a></p>
 
 # FluxForge: Greaseweazle GUI for Windows for floppy disk imaging, flux preservation and recovery
 
